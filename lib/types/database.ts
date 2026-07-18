@@ -1,6 +1,14 @@
 // Hand-written types mirroring supabase/migrations/0001_init.sql.
 // Keep in sync manually — regenerate with `supabase gen types` once a
 // live project exists if you'd rather not hand-maintain this.
+//
+// IMPORTANT: every row shape below is a `type` alias, not an `interface`.
+// TypeScript's structural checks treat the two differently inside
+// conditional types — an `interface` does not satisfy a `Record<string,
+// unknown>` constraint the way an equivalent `type` literal does — and
+// supabase-js's generic inference for `.from(...)` relies on exactly that
+// constraint. Using `interface` here silently makes every query/insert/
+// update argument type-check as `never`. Keep these as `type`.
 
 export type KycStatus = "none" | "pending" | "verified" | "rejected";
 
@@ -39,7 +47,7 @@ export type ProofStatus = "pending" | "verified" | "rejected";
 
 export type DisputeStatus = "open" | "under_review" | "resolved_buyer" | "resolved_seller" | "resolved_split";
 
-export interface Profile {
+export type Profile = {
   id: string;
   full_name: string | null;
   email: string;
@@ -49,9 +57,9 @@ export interface Profile {
   kyc_status: KycStatus;
   is_suspended: boolean;
   created_at: string;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   id: string;
   reference_code: string;
   title: string;
@@ -72,9 +80,9 @@ export interface Transaction {
   inspection_ends_at: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface PaymentMethod {
+export type PaymentMethod = {
   id: string;
   type: PaymentMethodType;
   label: string;
@@ -83,9 +91,9 @@ export interface PaymentMethod {
   instructions: string | null;
   is_active: boolean;
   created_at: string;
-}
+};
 
-export interface PaymentProof {
+export type PaymentProof = {
   id: string;
   transaction_id: string;
   uploaded_by: string;
@@ -99,9 +107,9 @@ export interface PaymentProof {
   reviewed_at: string | null;
   admin_note: string | null;
   created_at: string;
-}
+};
 
-export interface DeliveryProof {
+export type DeliveryProof = {
   id: string;
   transaction_id: string;
   uploaded_by: string;
@@ -109,9 +117,9 @@ export interface DeliveryProof {
   file_url: string | null;
   tracking_reference: string | null;
   created_at: string;
-}
+};
 
-export interface Dispute {
+export type Dispute = {
   id: string;
   transaction_id: string;
   opened_by: string;
@@ -121,9 +129,9 @@ export interface Dispute {
   resolved_by: string | null;
   resolved_at: string | null;
   created_at: string;
-}
+};
 
-export interface Message {
+export type Message = {
   id: string;
   transaction_id: string;
   sender_id: string | null;
@@ -131,18 +139,18 @@ export interface Message {
   is_system_event: boolean;
   attachment_url: string | null;
   created_at: string;
-}
+};
 
-export interface Notification {
+export type Notification = {
   id: string;
   user_id: string;
   type: string;
   payload: Record<string, unknown>;
   read_at: string | null;
   created_at: string;
-}
+};
 
-export interface Rating {
+export type Rating = {
   id: string;
   transaction_id: string;
   rated_by: string;
@@ -150,9 +158,9 @@ export interface Rating {
   score: number;
   comment: string | null;
   created_at: string;
-}
+};
 
-export interface Settings {
+export type Settings = {
   id: number;
   platform_name: string;
   fee_percentage: number;
@@ -160,9 +168,9 @@ export interface Settings {
   whatsapp_number: string | null;
   support_email: string | null;
   default_inspection_days: number;
-}
+};
 
-export interface AdminAction {
+export type AdminAction = {
   id: string;
   admin_id: string;
   action: string;
@@ -170,22 +178,47 @@ export interface AdminAction {
   target_id: string;
   note: string | null;
   created_at: string;
-}
+};
 
-export interface Database {
+type TableDef<Row, RequiredInsertKeys extends keyof Row> = {
+  Row: Row;
+  Insert: Partial<Row> & Pick<Row, RequiredInsertKeys>;
+  Update: Partial<Row>;
+  Relationships: [];
+};
+
+export type Database = {
   public: {
     Tables: {
-      profiles: { Row: Profile; Insert: Partial<Profile> & { id: string; email: string }; Update: Partial<Profile> };
-      transactions: { Row: Transaction; Insert: Partial<Transaction>; Update: Partial<Transaction> };
-      payment_methods: { Row: PaymentMethod; Insert: Partial<PaymentMethod>; Update: Partial<PaymentMethod> };
-      payment_proofs: { Row: PaymentProof; Insert: Partial<PaymentProof>; Update: Partial<PaymentProof> };
-      delivery_proofs: { Row: DeliveryProof; Insert: Partial<DeliveryProof>; Update: Partial<DeliveryProof> };
-      disputes: { Row: Dispute; Insert: Partial<Dispute>; Update: Partial<Dispute> };
-      messages: { Row: Message; Insert: Partial<Message>; Update: Partial<Message> };
-      notifications: { Row: Notification; Insert: Partial<Notification>; Update: Partial<Notification> };
-      ratings: { Row: Rating; Insert: Partial<Rating>; Update: Partial<Rating> };
-      settings: { Row: Settings; Insert: Partial<Settings>; Update: Partial<Settings> };
-      admin_actions: { Row: AdminAction; Insert: Partial<AdminAction>; Update: Partial<AdminAction> };
+      profiles: TableDef<Profile, "id" | "email">;
+      transactions: TableDef<
+        Transaction,
+        "title" | "category" | "amount" | "currency" | "fee_amount" | "fee_payer" | "total_payable" | "created_by"
+      >;
+      payment_methods: TableDef<PaymentMethod, "type" | "label">;
+      payment_proofs: TableDef<
+        PaymentProof,
+        "transaction_id" | "uploaded_by" | "amount_claimed" | "currency" | "file_url"
+      >;
+      delivery_proofs: TableDef<DeliveryProof, "transaction_id" | "uploaded_by">;
+      disputes: TableDef<Dispute, "transaction_id" | "opened_by" | "reason">;
+      messages: TableDef<Message, "transaction_id" | "body">;
+      notifications: TableDef<Notification, "user_id" | "type">;
+      ratings: TableDef<Rating, "transaction_id" | "rated_by" | "rated_user" | "score">;
+      settings: TableDef<Settings, never>;
+      admin_actions: TableDef<AdminAction, "admin_id" | "action" | "target_table" | "target_id">;
+    };
+    Views: {
+      profile_public: {
+        Row: Pick<Profile, "id" | "full_name">;
+        Relationships: [];
+      };
+    };
+    Functions: {
+      is_admin: {
+        Args: { uid?: string };
+        Returns: boolean;
+      };
     };
   };
-}
+};

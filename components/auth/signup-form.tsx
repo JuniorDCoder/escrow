@@ -1,0 +1,102 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { signUpAction } from "@/lib/actions/auth";
+import { signupSchema, type SignupInput } from "@/lib/validations/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export function SignupForm() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupInput>({ resolver: zodResolver(signupSchema) });
+
+  const onSubmit = (values: SignupInput) => {
+    setFormError(null);
+    startTransition(async () => {
+      const result = await signUpAction(values);
+      if (result.error) {
+        setFormError(result.error);
+        return;
+      }
+      setSubmitted(true);
+      router.refresh();
+    });
+  };
+
+  if (submitted) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We sent a confirmation link to finish setting up your account. Once confirmed, log in to get started.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild className="w-full">
+            <Link href="/auth/login">Go to login</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Create your account</CardTitle>
+        <CardDescription>Start a transaction as a Buyer or Seller in minutes.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="fullName">Full name</Label>
+            <Input id="fullName" autoComplete="name" {...register("fullName")} />
+            {errors.fullName && <p className="text-sm text-destructive">{errors.fullName.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" autoComplete="email" {...register("email")} />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" autoComplete="new-password" {...register("password")} />
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Input id="confirmPassword" type="password" autoComplete="new-password" {...register("confirmPassword")} />
+            {errors.confirmPassword && (
+              <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+            )}
+          </div>
+          {formError && <p className="text-sm text-destructive">{formError}</p>}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Creating account…" : "Create account"}
+          </Button>
+        </form>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+            Log in
+          </Link>
+        </p>
+      </CardContent>
+    </Card>
+  );
+}

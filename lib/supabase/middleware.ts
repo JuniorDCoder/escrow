@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const AUTH_ROUTES = ["/auth/login", "/auth/signup", "/auth/reset-password"];
+// /auth/reset-password is deliberately excluded: the password-recovery
+// email link lands here with an authenticated (recovery) session, and
+// redirecting it away would break the "set a new password" step.
+const AUTH_ROUTES = ["/auth/login", "/auth/signup"];
 const PROTECTED_PREFIXES = ["/dashboard", "/transactions", "/settings", "/admin"];
 
 export async function updateSession(request: NextRequest) {

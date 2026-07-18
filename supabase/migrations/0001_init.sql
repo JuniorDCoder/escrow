@@ -305,7 +305,9 @@ returns trigger
 language plpgsql
 as $$
 begin
-  if public.is_admin(auth.uid()) then
+  -- service_role (used by Server Actions for admin/cross-user writes,
+  -- see lib/supabase/admin.ts) and verified admins bypass this guard.
+  if auth.role() = 'service_role' or public.is_admin(auth.uid()) then
     return new;
   end if;
 
@@ -336,7 +338,7 @@ returns trigger
 language plpgsql
 as $$
 begin
-  if public.is_admin(auth.uid()) then
+  if auth.role() = 'service_role' or public.is_admin(auth.uid()) then
     return new;
   end if;
 
