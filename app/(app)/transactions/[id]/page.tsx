@@ -21,6 +21,9 @@ import { InspectionActions } from "@/components/transactions/inspection-actions"
 import { CancelTransactionButton } from "@/components/transactions/cancel-transaction-button";
 import { DisputeSummary } from "@/components/transactions/dispute-summary";
 import { MessageThread } from "@/components/transactions/message-thread";
+import { ForceTransitionDialog } from "@/components/admin/force-transition-dialog";
+import { PayoutActions } from "@/components/admin/payout-actions";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Transaction" };
 
@@ -89,6 +92,35 @@ export default async function TransactionDetailPage({ params }: { params: Promis
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {role === "admin" && (
+            <Card className="border-primary/40">
+              <CardHeader>
+                <CardTitle className="text-sm">Admin controls</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap items-center gap-2">
+                <PayoutActions transactionId={tx.id} status={tx.status} />
+                <ForceTransitionDialog transactionId={tx.id} currentStatus={tx.status} />
+                {detail.paymentProofs.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {detail.paymentProofs.map((p) => (
+                      <a
+                        key={p.id}
+                        href={p.signedUrl ?? "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex"
+                      >
+                        <Badge variant={p.status === "verified" ? "success" : p.status === "rejected" ? "destructive" : "warning"}>
+                          Proof {p.status} — {formatCurrency(p.amount_claimed, p.currency)}
+                        </Badge>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {role === "buyer_invitee" || role === "seller_invitee" ? (
             <AcceptInviteActions transactionId={tx.id} />
           ) : null}
