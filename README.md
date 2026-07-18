@@ -15,28 +15,31 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
 ## First-time setup
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com).
-2. **Run the schema migration** — creates every table, enum, RLS policy, trigger, and private storage bucket. Three
-   ways to do this, pick whichever fits how you've connected the project:
+2. **Run the schema migration** — creates every table, enum, RLS policy, trigger, and private storage bucket.
 
-   - **Fastest, always works — Supabase SQL Editor.** Dashboard → SQL Editor → New query → paste the entire contents
-     of `supabase/migrations/20250101000000_init.sql` → Run. Then do the same with `supabase/seed.sql` if you want
-     sample payment methods to start with (replace the sample bank/wallet details with real ones before going live).
-     This works regardless of whether the repo is linked to the project.
+   **Automated (recommended, set up once):** `.github/workflows/supabase-migrations.yml` runs
+   `supabase db push` against your linked project automatically on every push to `main` that touches
+   `supabase/migrations/**` — no dashboard step, no local CLI needed after this. To turn it on:
 
-   - **Supabase CLI, if you have it installed:**
-     ```bash
-     npx supabase login
-     npx supabase link --project-ref <your-project-ref>   # find this in the project's dashboard URL
-     npx supabase db push                                  # applies every file in supabase/migrations/
-     ```
+   1. Get a personal access token: [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) → Generate new token.
+   2. Get your database password: Project Settings → Database → Database password (the one you set when the
+      project was created; reset it there if you don't have it).
+   3. Get your project ref: it's in the project URL, `supabase.com/dashboard/project/<this-part>`.
+   4. In the GitHub repo: Settings → Secrets and variables → Actions → New repository secret, add all three:
+      `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
+   5. Push anything to `main` that touches `supabase/migrations/` (already true as of this commit — merging it
+      is enough) — or trigger it manually once from the **Actions** tab → "Deploy Supabase migrations" → **Run
+      workflow**. Watch the run; the last step's output confirms which migrations applied.
 
-   - **GitHub integration (Database → Integrations → GitHub in the Supabase dashboard).** If you've already connected
-     this repo there, Supabase watches the `supabase/migrations/` folder and applies new files when they land on the
-     branch you configured as production (usually `main`) — that migration is already on `main` as of this commit.
-     Check **Database → Migrations** in the dashboard to confirm `20250101000000_init` shows as applied; if it
-     doesn't, the integration may only be watching a preview/staging branch, or hasn't run yet — use the SQL Editor
-     path above as the reliable fallback, it's idempotent-safe to run once even if the integration also applies it
-     later (rerunning would just error on "already exists," which is harmless).
+   From then on, every future migration file you add and merge to `main` deploys itself. Note this only pushes
+   `supabase/migrations/` — it deliberately does **not** run `supabase/seed.sql` automatically, since that file
+   has placeholder bank/wallet details you shouldn't seed into production without reviewing (configure real
+   payment methods via `/admin/payment-methods` instead once you're an admin — see step 4 below).
+
+   **Manual fallback, if you'd rather not wire up CI right now — Supabase SQL Editor.** Dashboard → SQL Editor →
+   New query → paste the entire contents of `supabase/migrations/20250101000000_init.sql` → Run. This works
+   immediately regardless of any CI/CLI setup, and is safe to also do once even if you set up the automated path
+   above (rerunning a migration that already applied just errors on "already exists," harmless).
 
 3. **Copy environment variables**: `cp .env.example .env.local` and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Project Settings → API in Supabase.
@@ -67,6 +70,9 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
   in `lib/actions/_shared.ts`.
 - `lib/supabase/` — browser client, server (per-request) client, and the service-role admin client.
 - `supabase/migrations/20250101000000_init.sql` — the entire schema, RLS policies, and storage bucket setup.
+- `supabase/config.toml` — CLI project config (from `supabase init`); needed for `supabase link`/`db push` to work,
+  including in the CI workflow above. Don't rename or delete it.
+- `.github/workflows/supabase-migrations.yml` — auto-deploys new migrations on push to `main`, see setup above.
 
 ## Security notes
 
