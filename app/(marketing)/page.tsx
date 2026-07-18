@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ShieldCheck, FileCheck, PackageCheck, HandCoins, Lock, Eye, Scale } from "lucide-react";
+import { ShieldCheck, FileCheck, PackageCheck, HandCoins, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { getSettings } from "@/lib/data/settings";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FeeCalculator } from "@/components/marketing/fee-calculator";
 import { GetStartedForm } from "@/components/marketing/get-started-form";
+import { EscrowFlowGraphic } from "@/components/marketing/escrow-flow-graphic";
+import { TrustBadges } from "@/components/marketing/trust-badges";
+import { PaymentRails } from "@/components/marketing/payment-rails";
+import { CategoryShowcase } from "@/components/marketing/category-showcase";
+import { Reveal } from "@/components/marketing/reveal";
 
 export const metadata: Metadata = {
   title: "Trusted Escrow for Any Deal",
@@ -20,12 +25,6 @@ const STEPS = [
   { icon: ShieldCheck, title: "Admin verifies payment", body: "A real person confirms the funds landed before anyone is told to ship or deliver." },
   { icon: PackageCheck, title: "Seller delivers", body: "Once funds are secured, the Seller ships the item, hands over the domain, or completes the work." },
   { icon: Lock, title: "Buyer accepts & funds release", body: "Buyer inspects and accepts (or it auto-completes) — then we release payment to the Seller." },
-];
-
-const TRUST = [
-  { icon: Eye, title: "Nothing happens silently", body: "Every status change, upload, and message is timestamped on one shared timeline." },
-  { icon: Scale, title: "A human verifies every payment", body: "Funds are only marked secured after an Admin manually confirms your proof of payment." },
-  { icon: ShieldCheck, title: "Disputes are reviewed, not automated", body: "If something goes wrong, an Admin reviews evidence from both sides before anything moves." },
 ];
 
 async function getIsAuthenticated() {
@@ -44,99 +43,150 @@ export default async function LandingPage() {
   const [settings, isAuthenticated] = await Promise.all([getSettings(), getIsAuthenticated()]);
 
   return (
-    <div>
-      <section className="border-b border-border bg-gradient-to-b from-secondary/60 to-background">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Neutral third-party escrow
+    <div className="overflow-x-clip">
+      {/* HERO */}
+      <section className="relative isolate overflow-hidden border-b border-border">
+        <div className="absolute inset-0 -z-10 bg-dot-grid" />
+        <div
+          className="animate-blob absolute -left-24 -top-24 -z-10 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+          aria-hidden="true"
+        />
+        <div
+          className="animate-blob absolute -right-24 top-20 -z-10 h-96 w-96 rounded-full bg-secured/10 blur-3xl"
+          style={{ animationDelay: "3s" }}
+          aria-hidden="true"
+        />
+
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-secured" /> Neutral third-party escrow
+              </div>
+              <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
+                Buy and sell with <span className="text-primary">nothing to lose.</span>
+              </h1>
+              <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+                {APP_NAME}{" "}holds the money in the middle. The Seller only ships once payment is verified. The Buyer
+                only pays out once they accept delivery. Neither side is ever exposed.
+              </p>
+
+              <div className="mt-8">
+                <GetStartedForm isAuthenticated={isAuthenticated} whatsappNumber={settings.whatsapp_number} />
+              </div>
+
+              <div className="mt-5">
+                <Link
+                  href="/how-it-works"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  or see how it works first <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Buy and sell with nothing to lose.</h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              {APP_NAME} holds the money in the middle. The Seller only ships once payment is verified. The Buyer only
-              pays out once they accept delivery. Neither side is ever exposed.
-            </p>
-          </div>
 
-          <div className="mt-10">
-            <GetStartedForm isAuthenticated={isAuthenticated} whatsappNumber={settings.whatsapp_number} />
+            <div className="hidden lg:block">
+              <EscrowFlowGraphic />
+            </div>
           </div>
+        </div>
 
-          <div className="mt-6 text-center">
-            <Link href="/how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline">
-              or see how it works first →
-            </Link>
-          </div>
+        <div className="border-t border-border bg-card/60 py-6">
+          <p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Works with the payment methods you already use
+          </p>
+          <PaymentRails />
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="mb-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">How it works</h2>
-          <p className="mt-2 text-muted-foreground">Five steps, one shared timeline both sides can see.</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {STEPS.map((step, i) => (
-            <Card key={step.title}>
-              <CardContent className="space-y-3 py-6">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+      {/* HOW IT WORKS */}
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <Reveal>
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight">How it works</h2>
+            <p className="mt-2 text-muted-foreground">Five steps, one shared timeline both sides can see.</p>
+          </div>
+        </Reveal>
+        <div className="relative">
+          <div className="absolute left-0 right-0 top-[38px] hidden h-px bg-border lg:block" aria-hidden="true" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {STEPS.map((step, i) => (
+              <Reveal key={step.title} delay={i * 0.08}>
+                <div className="relative flex flex-col items-start gap-3 rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-card text-sm font-semibold text-primary">
                     {i + 1}
                   </div>
-                  <step.icon className="h-5 w-5 text-muted-foreground" />
+                  <step.icon className="h-5 w-5 text-secured" />
+                  <p className="font-medium">{step.title}</p>
+                  <p className="text-sm text-muted-foreground">{step.body}</p>
                 </div>
-                <p className="font-medium">{step.title}</p>
-                <p className="text-sm text-muted-foreground">{step.body}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-secondary/30">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight">Built for trust, not just transactions</h2>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {TRUST.map((t) => (
-              <div key={t.title} className="space-y-2 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-card shadow-sm">
-                  <t.icon className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium">{t.title}</p>
-                <p className="text-sm text-muted-foreground">{t.body}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <div className="mb-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">Know the cost before you commit</h2>
-          <p className="mt-2 text-muted-foreground">No login required — see exactly what you&apos;d pay or receive.</p>
-        </div>
-        <FeeCalculator feePercentage={settings.fee_percentage} feeMinimum={settings.fee_minimum} />
-        <div className="mt-6 text-center">
-          <Link href="/fees" className="text-sm font-medium text-primary hover:underline">
-            View full fee details →
-          </Link>
+      {/* CATEGORIES */}
+      <section className="border-y border-border bg-secondary/30 py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <Reveal>
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl font-semibold tracking-tight">Escrow for almost anything</h2>
+              <p className="mt-2 text-muted-foreground">Pick a category when you create a transaction — more are always welcome.</p>
+            </div>
+          </Reveal>
+          <CategoryShowcase />
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 pb-20 sm:px-6">
-        <Card className="bg-primary text-primary-foreground">
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <h2 className="text-2xl font-semibold">Ready to make your next deal safe?</h2>
-            <p className="max-w-md text-primary-foreground/80">
-              Create a transaction, invite the other party, and let us hold the funds until the work is done.
-            </p>
-            <Button asChild size="lg" variant="secondary">
-              <Link href="/auth/signup">Get started for free</Link>
-            </Button>
-          </CardContent>
-        </Card>
+      {/* TRUST */}
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <Reveal>
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight">Built for trust, not just transactions</h2>
+            <p className="mt-2 text-muted-foreground">Every safeguard here is something you can verify, not just a promise.</p>
+          </div>
+        </Reveal>
+        <TrustBadges />
+      </section>
+
+      {/* FEE CALCULATOR */}
+      <section className="border-t border-border bg-secondary/30 py-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <Reveal>
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-semibold tracking-tight">Know the cost before you commit</h2>
+              <p className="mt-2 text-muted-foreground">No login required — see exactly what you&apos;d pay or receive.</p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <FeeCalculator feePercentage={settings.fee_percentage} feeMinimum={settings.fee_minimum} />
+          </Reveal>
+          <div className="mt-6 text-center">
+            <Link href="/fees" className="text-sm font-medium text-primary hover:underline">
+              View full fee details →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-4xl px-4 py-20 sm:px-6">
+        <Reveal>
+          <Card className="relative overflow-hidden bg-primary text-primary-foreground">
+            <div className="bg-dot-grid absolute inset-0 opacity-20" aria-hidden="true" />
+            <ShieldCheck className="animate-float-slow pointer-events-none absolute -right-6 -top-6 h-40 w-40 text-primary-foreground/10" />
+            <CardContent className="relative flex flex-col items-center gap-4 py-14 text-center">
+              <h2 className="text-2xl font-semibold sm:text-3xl">Ready to make your next deal safe?</h2>
+              <p className="max-w-md text-primary-foreground/80">
+                Create a transaction, invite the other party, and let us hold the funds until the work is done.
+              </p>
+              <Button asChild size="lg" variant="secondary">
+                <Link href="/auth/signup">Get started for free</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </Reveal>
       </section>
     </div>
   );

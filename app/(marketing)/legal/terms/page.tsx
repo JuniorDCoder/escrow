@@ -19,7 +19,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold">1. What {APP_NAME} is</h2>
           <p className="mt-2 text-muted-foreground">
-            {APP_NAME} (&quot;we&quot;, &quot;us&quot;) is a mediation and verification service that helps a Buyer and a
+            {APP_NAME}{" "}(&quot;we&quot;, &quot;us&quot;) is a mediation and verification service that helps a Buyer and a
             Seller complete a transaction safely. We are <strong>not a bank, payment processor, or money transmitter</strong>,
             and we do not custody funds in an account we control. All payments happen directly between the Buyer and our
             published receiving account or wallet, off-platform. Our role is to verify that a payment has occurred, hold
@@ -68,7 +68,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold">6. Limitation of liability</h2>
           <p className="mt-2 text-muted-foreground">
-            {APP_NAME} verifies payment proofs and mediates disputes on a best-effort basis but cannot guarantee the
+            {APP_NAME}{" "}verifies payment proofs and mediates disputes on a best-effort basis but cannot guarantee the
             condition, legality, or delivery of any goods or services exchanged between Buyer and Seller. To the maximum
             extent permitted by law, our liability is limited to the fees you paid for the transaction in question.
           </p>

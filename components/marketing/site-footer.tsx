@@ -19,6 +19,7 @@ export function SiteFooter({ appName, whatsappNumber }: { appName: string; whats
           <div className="space-y-2">
             <p className="text-sm font-medium">Product</p>
             <FooterLink href="/how-it-works">How it works</FooterLink>
+            <FooterLink href="/security">Security</FooterLink>
             <FooterLink href="/fees">Fees</FooterLink>
             <FooterLink href="/faq">FAQ</FooterLink>
           </div>
