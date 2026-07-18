@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/data/settings";
+import { CURRENCIES, TRANSACTION_CATEGORIES } from "@/lib/constants";
 import { CreateTransactionForm } from "@/components/transactions/create-transaction-form";
 
 export const metadata: Metadata = { title: "New Transaction" };
 
-export default async function NewTransactionPage() {
-  const settings = await getSettings();
+export default async function NewTransactionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string; category?: string; currency?: string }>;
+}) {
+  const [settings, params] = await Promise.all([getSettings(), searchParams]);
+
+  const initialRole = params.role === "seller" ? "seller" : params.role === "buyer" ? "buyer" : undefined;
+  const initialCategory = TRANSACTION_CATEGORIES.some((c) => c.value === params.category) ? params.category : undefined;
+  const initialCurrency = CURRENCIES.includes(params.currency as (typeof CURRENCIES)[number]) ? params.currency : undefined;
 
   return (
     <div className="space-y-6">
@@ -19,6 +28,9 @@ export default async function NewTransactionPage() {
         feePercentage={settings.fee_percentage}
         feeMinimum={settings.fee_minimum}
         defaultInspectionDays={settings.default_inspection_days}
+        initialRole={initialRole}
+        initialCategory={initialCategory}
+        initialCurrency={initialCurrency}
       />
     </div>
   );

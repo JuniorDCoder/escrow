@@ -9,18 +9,26 @@ export interface ActionResult {
   error?: string;
 }
 
-export async function signUpAction(input: unknown): Promise<ActionResult> {
+export interface SignUpResult extends ActionResult {
+  /** True if Supabase requires email confirmation before a session exists. */
+  needsConfirmation?: boolean;
+}
+
+export async function signUpAction(input: unknown): Promise<SignUpResult> {
   const parsed = signupSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
-  const { fullName, email, password } = parsed.data;
+  const { fullName, email, password, next } = parsed.data;
 
   const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const emailRedirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(next || "/dashboard")}`;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName }, emailRedirectTo },
   });
 
   if (error) {
@@ -32,7 +40,7 @@ export async function signUpAction(input: unknown): Promise<ActionResult> {
     await claimInvitedTransactions(data.user.id, email);
   }
 
-  return {};
+  return { needsConfirmation: !data.session };
 }
 
 export async function loginAction(input: unknown): Promise<ActionResult> {

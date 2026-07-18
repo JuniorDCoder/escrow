@@ -25,9 +25,19 @@ interface CreateTransactionFormProps {
   feePercentage: number;
   feeMinimum: number;
   defaultInspectionDays: number;
+  initialRole?: "buyer" | "seller";
+  initialCategory?: string;
+  initialCurrency?: string;
 }
 
-export function CreateTransactionForm({ feePercentage, feeMinimum, defaultInspectionDays }: CreateTransactionFormProps) {
+export function CreateTransactionForm({
+  feePercentage,
+  feeMinimum,
+  defaultInspectionDays,
+  initialRole,
+  initialCategory,
+  initialCurrency,
+}: CreateTransactionFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -41,9 +51,10 @@ export function CreateTransactionForm({ feePercentage, feeMinimum, defaultInspec
   } = useForm<CreateTransactionFormInput, unknown, CreateTransactionInput>({
     resolver: zodResolver(createTransactionSchema),
     defaultValues: {
-      currency: "USD",
+      currency: (initialCurrency as CreateTransactionFormInput["currency"]) || "USD",
       feePayer: "buyer",
-      role: "buyer",
+      role: initialRole || "buyer",
+      category: initialCategory as CreateTransactionFormInput["category"],
       inspectionPeriodDays: defaultInspectionDays,
     },
   });

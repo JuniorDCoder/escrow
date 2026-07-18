@@ -6,6 +6,9 @@ export const signupSchema = z
     email: z.string().trim().email("Enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
+    // Where to send the user after signup — e.g. straight back into
+    // /transactions/new with the deal type they picked on the landing page.
+    next: z.string().trim().max(500).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

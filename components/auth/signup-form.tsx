@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signUpAction } from "@/lib/actions/auth";
 import { signupSchema, type SignupInput } from "@/lib/validations/auth";
@@ -14,6 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || undefined;
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -27,15 +29,22 @@ export function SignupForm() {
   const onSubmit = (values: SignupInput) => {
     setFormError(null);
     startTransition(async () => {
-      const result = await signUpAction(values);
+      const result = await signUpAction({ ...values, next });
       if (result.error) {
         setFormError(result.error);
         return;
       }
-      setSubmitted(true);
+      if (result.needsConfirmation) {
+        setSubmitted(true);
+        return;
+      }
+      // Email confirmation is disabled on this project — we already have a session.
+      router.push(next || "/dashboard");
       router.refresh();
     });
   };
+
+  const loginHref = next ? `/auth/login?next=${encodeURIComponent(next)}` : "/auth/login";
 
   if (submitted) {
     return (
@@ -43,12 +52,13 @@ export function SignupForm() {
         <CardHeader>
           <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            We sent a confirmation link to finish setting up your account. Once confirmed, log in to get started.
+            We sent a confirmation link to finish setting up your account.
+            {next ? " Once confirmed, you'll land right back where you left off." : " Once confirmed, log in to get started."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">
-            <Link href="/auth/login">Go to login</Link>
+            <Link href={loginHref}>Go to login</Link>
           </Button>
         </CardContent>
       </Card>
@@ -92,7 +102,7 @@ export function SignupForm() {
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-medium text-primary hover:underline">
+          <Link href={loginHref} className="font-medium text-primary hover:underline">
             Log in
           </Link>
         </p>

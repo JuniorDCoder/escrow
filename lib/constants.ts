@@ -12,7 +12,18 @@ export const DEFAULT_FEE_MINIMUM = 10;
 export const DEFAULT_SUPPORT_EMAIL = "support@example.com";
 export const DEFAULT_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
 
+// Keep in sync: CURRENCIES feeds the zod enum, CURRENCY_OPTIONS adds the
+// flag/label for UI pickers.
 export const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "KES", "ZAR"] as const;
+
+export const CURRENCY_OPTIONS: { code: (typeof CURRENCIES)[number]; label: string; flag: string }[] = [
+  { code: "USD", label: "US Dollar", flag: "🇺🇸" },
+  { code: "EUR", label: "Euro", flag: "🇪🇺" },
+  { code: "GBP", label: "British Pound", flag: "🇬🇧" },
+  { code: "NGN", label: "Nigerian Naira", flag: "🇳🇬" },
+  { code: "KES", label: "Kenyan Shilling", flag: "🇰🇪" },
+  { code: "ZAR", label: "South African Rand", flag: "🇿🇦" },
+];
 
 export const TRANSACTION_CATEGORIES = [
   { value: "domain", label: "Domain Name" },
@@ -28,4 +39,16 @@ export const FEE_PAYER_OPTIONS = [
   { value: "buyer", label: "Buyer pays the fee" },
   { value: "seller", label: "Seller pays the fee" },
   { value: "split", label: "Split 50/50" },
+] as const;
+
+/**
+ * The landing page's "get started" role picker. "broker" isn't a supported
+ * transaction role yet (AGENTS.md Section 3: Broker/Affiliate is v2), so it
+ * routes to WhatsApp instead of the create-transaction flow — see
+ * GetStartedForm.
+ */
+export const GET_STARTED_ROLES = [
+  { value: "buyer", label: "I'm Buying" },
+  { value: "seller", label: "I'm Selling" },
+  { value: "broker", label: "I'm Brokering" },
 ] as const;
