@@ -107,14 +107,14 @@ async function claimInvitedTransactions(userId: string, email: string) {
     .from("transactions")
     .update({ buyer_id: userId })
     .is("buyer_id", null)
-    .ilike("buyer_email", lowerEmail)
+    .eq("buyer_email", lowerEmail)
     .select("id");
 
   const { data: asSeller } = await admin
     .from("transactions")
     .update({ seller_id: userId })
     .is("seller_id", null)
-    .ilike("seller_email", lowerEmail)
+    .eq("seller_email", lowerEmail)
     .select("id");
 
   return { linked: (asBuyer?.length ?? 0) + (asSeller?.length ?? 0) };

@@ -15,7 +15,12 @@ export const createTransactionSchema = z.object({
   inspectionPeriodDays: z.coerce.number().int().min(1).max(60),
 });
 
-export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+// react-hook-form needs the pre-coercion ("Input") shape for its internal
+// field state (amount/inspectionPeriodDays arrive as strings from <input>),
+// while Server Actions want the coerced ("Output") shape. See the 3-generic
+// useForm<Input, Context, Output> pattern in create-transaction-form.tsx.
+export type CreateTransactionFormInput = z.input<typeof createTransactionSchema>;
+export type CreateTransactionInput = z.output<typeof createTransactionSchema>;
 
 export const disputeSchema = z.object({
   transactionId: z.string().uuid(),

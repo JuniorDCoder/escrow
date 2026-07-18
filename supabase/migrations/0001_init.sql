@@ -108,8 +108,11 @@ create index if not exists transactions_buyer_id_idx on public.transactions (buy
 create index if not exists transactions_seller_id_idx on public.transactions (seller_id);
 create index if not exists transactions_created_by_idx on public.transactions (created_by);
 create index if not exists transactions_status_idx on public.transactions (status);
-create index if not exists transactions_buyer_email_idx on public.transactions (lower(buyer_email));
-create index if not exists transactions_seller_email_idx on public.transactions (lower(seller_email));
+-- buyer_email/seller_email are always normalized to lowercase at the
+-- application layer (see lib/actions/transactions.ts), so a plain index
+-- (not a lower(...) functional one) is what queries actually hit.
+create index if not exists transactions_buyer_email_idx on public.transactions (buyer_email);
+create index if not exists transactions_seller_email_idx on public.transactions (seller_email);
 
 create table if not exists public.payment_methods (
   id uuid primary key default gen_random_uuid(),
