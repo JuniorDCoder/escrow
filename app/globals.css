@@ -1,26 +1,127 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0b1120;
+
+  --card: #ffffff;
+  --card-foreground: #0b1120;
+
+  --primary: #0e3a53;
+  --primary-foreground: #f8fafc;
+
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0e3a53;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0e3a53;
+
+  /*
+   * Reserved exclusively for "funds secured" / escrow-confirmed states
+   * (funded badge, verified payment, released banner). Do not use this
+   * token for generic buttons, links, or decoration — see AGENTS.md
+   * Section 10: the accent must stay meaningful, not decorative.
+   */
+  --secured: #b7791f;
+  --secured-foreground: #fffbeb;
+  --secured-soft: #fef3c7;
+
+  --success: #15803d;
+  --success-foreground: #f0fdf4;
+  --success-soft: #dcfce7;
+
+  --warning: #b45309;
+  --warning-foreground: #fffbeb;
+  --warning-soft: #fef3c7;
+
+  --destructive: #b91c1c;
+  --destructive-foreground: #fef2f2;
+  --destructive-soft: #fee2e2;
+
+  --radius: 0.65rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #070b14;
+    --foreground: #e2e8f0;
+
+    --card: #0b1120;
+    --card-foreground: #e2e8f0;
+
+    --primary: #2f7c94;
+    --primary-foreground: #f8fafc;
+
+    --secondary: #111827;
+    --secondary-foreground: #e2e8f0;
+
+    --muted: #111827;
+    --muted-foreground: #94a3b8;
+
+    --border: #1f2937;
+    --input: #1f2937;
+    --ring: #2f7c94;
+
+    --secured: #d69e2e;
+    --secured-foreground: #1c1400;
+    --secured-soft: #2a2105;
+
+    --success: #22c55e;
+    --success-foreground: #052e16;
+    --success-soft: #052e16;
+
+    --warning: #d69e2e;
+    --warning-foreground: #1c1400;
+    --warning-soft: #2a2105;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #2a0a0a;
+    --destructive-soft: #2a0a0a;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-secured: var(--secured);
+  --color-secured-foreground: var(--secured-foreground);
+  --color-secured-soft: var(--secured-soft);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.15rem);
+  --radius-sm: calc(var(--radius) - 0.3rem);
+  --font-sans: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  border-color: var(--border);
 }
