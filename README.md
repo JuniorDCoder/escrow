@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Amana Escrow (placeholder name)
 
-## Getting Started
+A trusted third-party escrow platform: a Buyer and Seller agree on a deal, the Buyer pays into escrow off-platform and
+uploads proof, an Admin manually verifies it, the Seller delivers, and funds are released once the Buyer accepts. See
+[`AGENTS.md`](./AGENTS.md) for the full product spec this build follows — read it before making product decisions.
 
-First, run the development server:
+**"Amana Escrow" is a placeholder brand.** No name/logo has been chosen by the client yet. The name is not hardcoded
+anywhere — it's read from `NEXT_PUBLIC_APP_NAME` in one place, `lib/constants.ts`. Change the env var to rebrand.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Next.js (App Router) + TypeScript, Supabase (Postgres, Auth, Storage), Tailwind CSS v4, react-hook-form + zod, Server
+Actions for all mutations. No payment gateway — payment confirmation is a manual, human-verified step by design.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## First-time setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Create a Supabase project** at [supabase.com](https://supabase.com).
+2. **Run the schema migration.** In the Supabase SQL Editor (or via the CLI), run
+   `supabase/migrations/0001_init.sql`. This creates every table, enum, RLS policy, trigger, and private storage
+   bucket. Optionally follow it with `supabase/seed.sql` for sample payment methods and settings — replace the sample
+   bank/wallet details with real ones before going live.
+3. **Copy environment variables**: `cp .env.example .env.local` and fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Project Settings → API in Supabase.
+   - `SUPABASE_SERVICE_ROLE_KEY` — same page. **Server-only, never expose to the client or commit it.**
+   - `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_SITE_URL` as needed.
+4. **Make yourself an admin.** Sign up through the app once, then in the Supabase SQL Editor:
+   ```sql
+   update public.profiles set is_admin = true where email = 'you@example.com';
+   ```
+5. **Install and run:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+- `app/(marketing)/*` — public site: landing, how-it-works, fees, FAQ, contact, legal.
+- `app/auth/*` — login, signup, password reset (Supabase Auth).
+- `app/(app)/*` — authenticated Buyer/Seller app: dashboard, transaction creation/detail, settings.
+- `app/admin/*` — admin console (payment review queue, disputes, users, payment methods, settings), gated by
+  `profiles.is_admin`.
+- `lib/domain/` — the transaction state machine (`state-machine.ts`), fee calculator (`fees.ts`), permissions,
+  notification copy. Business rules live here, not scattered through components.
+- `lib/actions/` — all Server Actions (mutations). Every status-changing action validates the caller via the
+  request-scoped Supabase client (which respects Row Level Security) before writing through the service-role client
+  in `lib/actions/_shared.ts`.
+- `lib/supabase/` — browser client, server (per-request) client, and the service-role admin client.
+- `supabase/migrations/0001_init.sql` — the entire schema, RLS policies, and storage bucket setup.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- RLS is enabled on every table — see the migration for the exact policies. The service-role key bypasses RLS and is
+  only ever imported in server-only files (`lib/actions/_shared.ts`, `lib/supabase/admin.ts`).
+- Payment proof and KYC files live in private Storage buckets, served only via short-lived signed URLs generated
+  server-side (`lib/data/storage.ts`). Sellers never see a Buyer's uploaded payment proof file — only the resulting
+  "funded" status.
+- Every admin mutation is written to `admin_actions` for an audit trail.
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Push to GitHub and import the repo in [Vercel](https://vercel.com/new). Add the same environment variables from
+`.env.example` in the Vercel project settings. No other configuration is required — there's no background job runner;
+an expired inspection window is auto-accepted lazily the next time the transaction is loaded (see
+`reconcileInspectionWindow` in `lib/actions/transactions.ts`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## What's still open
+
+See AGENTS.md Section 13 — exact payment methods/networks to support, final fee structure, KYC depth, and the
+WhatsApp number(s) are all client decisions that need to be set in `/admin/settings` and `/admin/payment-methods`
+before launch. The brand name and logo also still need to be chosen (Section 10 has candidate directions).

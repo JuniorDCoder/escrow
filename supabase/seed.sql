@@ -18,4 +18,4 @@ values
   ('crypto', 'USDT (TRC20)', 'Tron (TRC20)', '{"address": "TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}', 'Send the exact amount shown. Underpayments/overpayments delay verification.', true),
   ('crypto', 'Bitcoin', 'BTC (on-chain)', '{"address": "bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}', 'Wait for at least 1 confirmation before uploading your proof.', true),
   ('mobile_money', 'M-Pesa', 'Kenya', '{"paybill": "000000", "account_name": "Amana Escrow"}', 'Use your transaction reference code as the account number.', false)
-on conflict do nothing;
+on conflict (label) do nothing;

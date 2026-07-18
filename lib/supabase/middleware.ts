@@ -10,9 +10,24 @@ const PROTECTED_PREFIXES = ["/dashboard", "/transactions", "/settings", "/admin"
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Without Supabase configured we can't know who's signed in, but the
+  // public marketing pages don't need that — fail open there instead of
+  // 500-ing the whole site. Protected pages still resolve safely: their
+  // own layouts (app/(app)/layout.tsx, app/admin/layout.tsx) redirect to
+  // /auth/login when there's no session.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[proxy] NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set — skipping session refresh.");
+    }
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {

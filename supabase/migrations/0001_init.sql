@@ -117,7 +117,7 @@ create index if not exists transactions_seller_email_idx on public.transactions 
 create table if not exists public.payment_methods (
   id uuid primary key default gen_random_uuid(),
   type payment_method_type not null,
-  label text not null,
+  label text not null unique,
   network text,
   account_details jsonb not null default '{}'::jsonb,
   instructions text,
