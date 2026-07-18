@@ -63,20 +63,20 @@ export function FeeCalculator({ feePercentage, feeMinimum }: { feePercentage: nu
         <div className="space-y-3 rounded-md bg-secondary/50 p-5 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Deal amount</span>
-            <span className="font-medium">{formatCurrency(fee.amount, currency)}</span>
+            <span className="font-mono font-medium tabular-nums">{formatCurrency(fee.amount, currency)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Escrow fee</span>
-            <span className="font-medium">{formatCurrency(fee.feeAmount, currency)}</span>
+            <span className="font-mono font-medium tabular-nums">{formatCurrency(fee.feeAmount, currency)}</span>
           </div>
           <Separator />
           <div className="flex justify-between text-base">
             <span className="font-medium">Buyer pays</span>
-            <span className="font-semibold text-primary">{formatCurrency(fee.totalPayable, currency)}</span>
+            <span className="font-mono font-semibold tabular-nums text-primary">{formatCurrency(fee.totalPayable, currency)}</span>
           </div>
           <div className="flex justify-between text-base">
             <span className="font-medium">Seller receives</span>
-            <span className="font-semibold text-secured">{formatCurrency(fee.sellerReceives, currency)}</span>
+            <span className="font-mono font-semibold tabular-nums text-secured">{formatCurrency(fee.sellerReceives, currency)}</span>
           </div>
         </div>
       </CardContent>

@@ -1,21 +1,22 @@
-import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
+import { getSettings } from "@/lib/data/settings";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { AuthSidePanel } from "@/components/marketing/auth-side-panel";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSettings();
+
   return (
-    <div className="flex min-h-screen flex-col bg-secondary/40">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <ShieldCheck className="h-5 w-5 text-primary" />
-            {APP_NAME}
-          </Link>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader appName={APP_NAME} />
+      <main className="grid flex-1 lg:grid-cols-2">
+        <AuthSidePanel />
+        <div className="bg-dot-grid flex items-center justify-center px-4 py-16 sm:px-6">
+          <div className="w-full max-w-md">{children}</div>
         </div>
-      </header>
-      <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">{children}</div>
       </main>
+      <SiteFooter appName={APP_NAME} whatsappNumber={settings.whatsapp_number} />
     </div>
   );
 }

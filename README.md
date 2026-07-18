@@ -15,10 +15,29 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
 ## First-time setup
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com).
-2. **Run the schema migration.** In the Supabase SQL Editor (or via the CLI), run
-   `supabase/migrations/0001_init.sql`. This creates every table, enum, RLS policy, trigger, and private storage
-   bucket. Optionally follow it with `supabase/seed.sql` for sample payment methods and settings — replace the sample
-   bank/wallet details with real ones before going live.
+2. **Run the schema migration** — creates every table, enum, RLS policy, trigger, and private storage bucket. Three
+   ways to do this, pick whichever fits how you've connected the project:
+
+   - **Fastest, always works — Supabase SQL Editor.** Dashboard → SQL Editor → New query → paste the entire contents
+     of `supabase/migrations/20250101000000_init.sql` → Run. Then do the same with `supabase/seed.sql` if you want
+     sample payment methods to start with (replace the sample bank/wallet details with real ones before going live).
+     This works regardless of whether the repo is linked to the project.
+
+   - **Supabase CLI, if you have it installed:**
+     ```bash
+     npx supabase login
+     npx supabase link --project-ref <your-project-ref>   # find this in the project's dashboard URL
+     npx supabase db push                                  # applies every file in supabase/migrations/
+     ```
+
+   - **GitHub integration (Database → Integrations → GitHub in the Supabase dashboard).** If you've already connected
+     this repo there, Supabase watches the `supabase/migrations/` folder and applies new files when they land on the
+     branch you configured as production (usually `main`) — that migration is already on `main` as of this commit.
+     Check **Database → Migrations** in the dashboard to confirm `20250101000000_init` shows as applied; if it
+     doesn't, the integration may only be watching a preview/staging branch, or hasn't run yet — use the SQL Editor
+     path above as the reliable fallback, it's idempotent-safe to run once even if the integration also applies it
+     later (rerunning would just error on "already exists," which is harmless).
+
 3. **Copy environment variables**: `cp .env.example .env.local` and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Project Settings → API in Supabase.
    - `SUPABASE_SERVICE_ROLE_KEY` — same page. **Server-only, never expose to the client or commit it.**
@@ -47,7 +66,7 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
   request-scoped Supabase client (which respects Row Level Security) before writing through the service-role client
   in `lib/actions/_shared.ts`.
 - `lib/supabase/` — browser client, server (per-request) client, and the service-role admin client.
-- `supabase/migrations/0001_init.sql` — the entire schema, RLS policies, and storage bucket setup.
+- `supabase/migrations/20250101000000_init.sql` — the entire schema, RLS policies, and storage bucket setup.
 
 ## Security notes
 

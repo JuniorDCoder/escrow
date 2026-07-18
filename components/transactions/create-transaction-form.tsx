@@ -240,20 +240,20 @@ export function CreateTransactionForm({
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Deal amount</span>
-              <span className="font-medium">{formatCurrency(fee.amount, watch("currency") || "USD")}</span>
+              <span className="font-mono font-medium tabular-nums">{formatCurrency(fee.amount, watch("currency") || "USD")}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Escrow fee</span>
-              <span className="font-medium">{formatCurrency(fee.feeAmount, watch("currency") || "USD")}</span>
+              <span className="font-mono font-medium tabular-nums">{formatCurrency(fee.feeAmount, watch("currency") || "USD")}</span>
             </div>
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Buyer pays into escrow</span>
-              <span className="font-semibold">{formatCurrency(fee.totalPayable, watch("currency") || "USD")}</span>
+              <span className="font-mono font-semibold tabular-nums">{formatCurrency(fee.totalPayable, watch("currency") || "USD")}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Seller receives</span>
-              <span className="font-semibold">{formatCurrency(fee.sellerReceives, watch("currency") || "USD")}</span>
+              <span className="font-mono font-semibold tabular-nums">{formatCurrency(fee.sellerReceives, watch("currency") || "USD")}</span>
             </div>
             {formError && <p className="pt-2 text-sm text-destructive">{formError}</p>}
             <Button type="submit" className="mt-2 w-full" disabled={isPending}>

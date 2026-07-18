@@ -66,7 +66,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
             <h1 className="text-2xl font-semibold tracking-tight">{tx.title}</h1>
             <StatusBadge status={tx.status} />
           </div>
-          <p className="text-sm text-muted-foreground">{tx.reference_code}</p>
+          <p className="font-mono text-sm text-muted-foreground">{tx.reference_code}</p>
         </div>
         {whatsappHref && (
           <a
@@ -270,11 +270,19 @@ export default async function TransactionDetailPage({ params }: { params: Promis
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <Row label="Category" value={tx.category.replace(/_/g, " ")} capitalize />
-              <Row label="Amount" value={formatCurrency(tx.amount, tx.currency)} />
-              <Row label="Escrow fee" value={formatCurrency(tx.fee_amount, tx.currency)} />
+              <Row label="Amount" value={formatCurrency(tx.amount, tx.currency)} mono />
+              <Row label="Escrow fee" value={formatCurrency(tx.fee_amount, tx.currency)} mono />
               <Separator />
-              <Row label="Buyer pays" value={formatCurrency(tx.total_payable, tx.currency)} strong />
-              <Row label="Seller receives" value={formatCurrency(tx.amount - (tx.fee_payer !== "buyer" ? tx.fee_amount * (tx.fee_payer === "split" ? 0.5 : 1) : 0), tx.currency)} strong />
+              <Row label="Buyer pays" value={formatCurrency(tx.total_payable, tx.currency)} strong mono />
+              <Row
+                label="Seller receives"
+                value={formatCurrency(
+                  tx.amount - (tx.fee_payer !== "buyer" ? tx.fee_amount * (tx.fee_payer === "split" ? 0.5 : 1) : 0),
+                  tx.currency
+                )}
+                strong
+                mono
+              />
               <Separator />
               <Row label="Buyer" value={detail.buyerName || tx.buyer_email || "—"} />
               <Row label="Seller" value={detail.sellerName || tx.seller_email || "—"} />
@@ -296,11 +304,27 @@ export default async function TransactionDetailPage({ params }: { params: Promis
   );
 }
 
-function Row({ label, value, strong, capitalize }: { label: string; value: string; strong?: boolean; capitalize?: boolean }) {
+function Row({
+  label,
+  value,
+  strong,
+  capitalize,
+  mono,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  capitalize?: boolean;
+  mono?: boolean;
+}) {
   return (
     <div className="flex justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className={`text-right ${strong ? "font-semibold" : ""} ${capitalize ? "capitalize" : ""}`}>{value}</span>
+      <span
+        className={`text-right ${strong ? "font-semibold" : ""} ${capitalize ? "capitalize" : ""} ${mono ? "font-mono tabular-nums" : ""}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

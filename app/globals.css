@@ -114,7 +114,8 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 0.15rem);
   --radius-sm: calc(var(--radius) - 0.3rem);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-manrope);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {

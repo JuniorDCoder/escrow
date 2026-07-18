@@ -60,12 +60,12 @@ export default async function DashboardPage() {
                         <StatusBadge status={tx.status} />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {tx.reference_code} · You&apos;re the {role} · with {counterpart ?? "unknown"} · updated{" "}
-                        {formatDateShort(tx.updated_at)}
+                        <span className="font-mono">{tx.reference_code}</span> · You&apos;re the {role} · with{" "}
+                        {counterpart ?? "unknown"} · updated {formatDateShort(tx.updated_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-4 self-end sm:self-auto">
-                      <span className="font-semibold">{formatCurrency(tx.total_payable, tx.currency)}</span>
+                      <span className="font-mono font-semibold tabular-nums">{formatCurrency(tx.total_payable, tx.currency)}</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </CardContent>
