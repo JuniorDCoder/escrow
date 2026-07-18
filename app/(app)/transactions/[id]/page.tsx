@@ -21,6 +21,7 @@ import { InspectionActions } from "@/components/transactions/inspection-actions"
 import { CancelTransactionButton } from "@/components/transactions/cancel-transaction-button";
 import { DisputeSummary } from "@/components/transactions/dispute-summary";
 import { MessageThread } from "@/components/transactions/message-thread";
+import { RatingForm } from "@/components/transactions/rating-form";
 import { ForceTransitionDialog } from "@/components/admin/force-transition-dialog";
 import { PayoutActions } from "@/components/admin/payout-actions";
 import { Badge } from "@/components/ui/badge";
@@ -229,6 +230,21 @@ export default async function TransactionDetailPage({ params }: { params: Promis
               </CardContent>
             </Card>
           )}
+
+          {(tx.status === "released" || tx.status === "refunded") &&
+            (role === "buyer" || role === "seller") &&
+            !detail.ratings.some((r) => r.rated_by === user.id) &&
+            (() => {
+              const ratedUser = role === "buyer" ? tx.seller_id : tx.buyer_id;
+              if (!ratedUser) return null;
+              return (
+                <RatingForm
+                  transactionId={tx.id}
+                  ratedUser={ratedUser}
+                  ratedUserLabel={role === "buyer" ? "Seller" : "Buyer"}
+                />
+              );
+            })()}
 
           <DisputeSummary disputes={detail.disputes} />
 

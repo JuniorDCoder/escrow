@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { logoutAction } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NotificationBell } from "@/components/layout/notification-bell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Notification } from "@/lib/types/database";
 
 interface AppHeaderProps {
   appName: string;
   fullName: string | null;
   email: string;
   isAdmin: boolean;
+  notifications: Notification[];
+  unreadCount: number;
 }
 
 function initials(name: string | null, email: string) {
@@ -30,7 +34,7 @@ function initials(name: string | null, email: string) {
   return source.slice(0, 2).toUpperCase();
 }
 
-export function AppHeader({ appName, fullName, email, isAdmin }: AppHeaderProps) {
+export function AppHeader({ appName, fullName, email, isAdmin, notifications, unreadCount }: AppHeaderProps) {
   const pathname = usePathname();
 
   const navLink = (href: string, label: string, icon: React.ReactNode) => (
@@ -66,6 +70,7 @@ export function AppHeader({ appName, fullName, email, isAdmin }: AppHeaderProps)
               New Transaction
             </Link>
           </Button>
+          <NotificationBell notifications={notifications} unreadCount={unreadCount} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
