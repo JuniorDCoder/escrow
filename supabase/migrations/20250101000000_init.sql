@@ -308,9 +308,14 @@ returns trigger
 language plpgsql
 as $$
 begin
-  -- service_role (used by Server Actions for admin/cross-user writes,
-  -- see lib/supabase/admin.ts) and verified admins bypass this guard.
-  if auth.role() = 'service_role' or public.is_admin(auth.uid()) then
+  -- service_role (used by Server Actions for admin/cross-user writes, see
+  -- lib/supabase/admin.ts), verified admins, and direct database sessions
+  -- (SQL Editor, migrations, psql -- these have no JWT so auth.uid() is
+  -- null) all bypass this guard. The last case is safe: RLS already fully
+  -- blocks anonymous/unauthenticated PostgREST requests before they ever
+  -- reach this trigger, so a null auth.uid() here only ever means a
+  -- trusted superuser connection, not a public request slipping through.
+  if auth.role() = 'service_role' or auth.uid() is null or public.is_admin(auth.uid()) then
     return new;
   end if;
 
@@ -341,7 +346,10 @@ returns trigger
 language plpgsql
 as $$
 begin
-  if auth.role() = 'service_role' or public.is_admin(auth.uid()) then
+  -- See guard_transaction_updates() above for why a null auth.uid() (a
+  -- direct database session, e.g. the SQL Editor bootstrapping the first
+  -- admin) is a safe bypass here too.
+  if auth.role() = 'service_role' or auth.uid() is null or public.is_admin(auth.uid()) then
     return new;
   end if;
 
