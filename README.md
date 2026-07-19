@@ -44,7 +44,28 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
 3. **Copy environment variables**: `cp .env.example .env.local` and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Project Settings → API in Supabase.
    - `SUPABASE_SERVICE_ROLE_KEY` — same page. **Server-only, never expose to the client or commit it.**
-   - `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_SITE_URL` as needed.
+   - `NEXT_PUBLIC_SITE_URL` — **set this to your real deployed URL in Vercel's project settings, not just
+     locally.** It's used to build every link in emails and auth redirects; left unset in production, it
+     silently falls back to `http://localhost:3000` and every one of those links breaks.
+   - `RESEND_API_KEY` / `EMAIL_FROM` — without these, the app only creates in-app notifications and logs a
+     warning instead of emailing. Get a key at [resend.com](https://resend.com), verify a sending domain, and
+     set `EMAIL_FROM` to an address on it. **This matters more than it sounds**: when someone creates a
+     transaction and invites a counterparty who doesn't have an account yet, email is the *only* way that
+     person finds out — there's no in-app notification to show someone who's never logged in.
+   - `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_WHATSAPP_NUMBER` as needed.
+   - **On Vercel specifically:** these all need to be added under Project Settings → Environment Variables —
+     a local `.env.local` file has no effect on the deployed site.
+
+   **On Supabase Auth email links landing on the wrong URL:** if a confirmation/reset email link takes someone
+   to `localhost:3000` (or the wrong domain) instead of your deployed app, that's not this app's code — it's
+   Supabase's own **Authentication → URL Configuration** settings. Supabase ignores the redirect URL your code
+   asks for unless it's on the allow-list, and silently falls back to whatever **Site URL** is configured
+   there (which defaults to `http://localhost:3000` on every new project). Fix it in the Supabase dashboard:
+   - **Site URL** → your real deployed URL (e.g. `https://your-app.vercel.app`)
+   - **Redirect URLs** → add `https://your-app.vercel.app/auth/callback` and, for flexibility across preview
+     deploys, a wildcard like `https://your-app.vercel.app/**`. Keep `http://localhost:3000/**` in the list
+     too so local dev keeps working.
+
 4. **Make yourself an admin.** Sign up through the app once, then in the Supabase SQL Editor:
    ```sql
    update public.profiles set is_admin = true where email = 'you@example.com';

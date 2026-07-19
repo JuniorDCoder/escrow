@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loginSchema, requestResetSchema, signupSchema, updatePasswordSchema } from "@/lib/validations/auth";
+import { SITE_URL } from "@/lib/constants";
 
 export interface ActionResult {
   error?: string;
@@ -22,8 +23,7 @@ export async function signUpAction(input: unknown): Promise<SignUpResult> {
   const { fullName, email, password, next } = parsed.data;
 
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const emailRedirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(next || "/dashboard")}`;
+  const emailRedirectTo = `${SITE_URL}/auth/callback?next=${encodeURIComponent(next || "/dashboard")}`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -76,10 +76,9 @@ export async function requestPasswordResetAction(input: unknown): Promise<Action
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${siteUrl}/auth/callback?next=/auth/reset-password`,
+    redirectTo: `${SITE_URL}/auth/callback?next=/auth/reset-password`,
   });
 
   if (error) {

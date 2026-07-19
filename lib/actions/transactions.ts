@@ -21,6 +21,10 @@ import {
 } from "@/lib/validations/transaction";
 import { submitDeliveryProofSchema } from "@/lib/validations/payment";
 import { getSettings } from "@/lib/data/settings";
+import { SITE_URL } from "@/lib/constants";
+import { sendEmail } from "@/lib/email/send";
+import { transactionInviteEmail } from "@/lib/email/templates";
+import { formatCurrency } from "@/lib/utils";
 import type { Transaction } from "@/lib/types/database";
 
 export interface ActionResult<T = undefined> {
@@ -87,11 +91,32 @@ export async function createTransactionAction(input: unknown): Promise<ActionRes
       .eq("email", counterpartyEmail)
       .maybeSingle();
 
+    const inviteTargetUrl = `/transactions/${inserted.id}`;
+
     if (counterpartyProfile) {
+      // notifyUser also emails them — see lib/actions/_shared.ts.
       await notifyUser(admin, counterpartyProfile.id, "transaction_invite", {
         transactionId: inserted.id,
         referenceCode: inserted.reference_code,
         title: inserted.title,
+      });
+    } else {
+      // No account yet: there's nowhere to attach an in-app notification,
+      // so this email is the only way they find out about the invite —
+      // send it directly with a signup link that lands them right back on
+      // this transaction once they've created an account.
+      await sendEmail({
+        to: counterpartyEmail,
+        subject: `You're invited to an escrow transaction — ${inserted.reference_code}`,
+        html: transactionInviteEmail({
+          role: isBuyer ? "seller" : "buyer",
+          title: inserted.title,
+          referenceCode: inserted.reference_code,
+          amountFormatted: formatCurrency(inserted.amount, inserted.currency),
+          inviterName: profile.full_name || profile.email,
+          actionUrl: `${SITE_URL}/auth/signup?next=${encodeURIComponent(inviteTargetUrl)}`,
+          hasAccount: false,
+        }),
       });
     }
 

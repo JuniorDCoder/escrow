@@ -6,6 +6,21 @@
  */
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Amana Escrow";
 
+/**
+ * Absolute origin used to build links in emails (invites, auth redirects).
+ * Set NEXT_PUBLIC_SITE_URL in every deployed environment (Vercel project
+ * settings, not just .env.local) — the localhost fallback below is for
+ * local dev only and will silently produce broken links in emails if it's
+ * ever hit in production.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+
+if (!process.env.NEXT_PUBLIC_SITE_URL && process.env.NODE_ENV === "production") {
+  console.warn(
+    "[config] NEXT_PUBLIC_SITE_URL is not set in production — emails and auth redirects will incorrectly point at localhost. Set it in your deployment's environment variables."
+  );
+}
+
 export const DEFAULT_INSPECTION_DAYS = 3;
 export const DEFAULT_FEE_PERCENTAGE = 3.5;
 export const DEFAULT_FEE_MINIMUM = 10;

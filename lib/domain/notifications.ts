@@ -1,6 +1,8 @@
 import type { Notification } from "@/lib/types/database";
 
-export function getNotificationCopy(n: Notification): { text: string; href: string | null } {
+type NotificationLike = Pick<Notification, "type" | "payload">;
+
+export function getNotificationCopy(n: NotificationLike): { text: string; href: string | null } {
   const p = n.payload as Record<string, unknown>;
   const ref = typeof p.referenceCode === "string" ? p.referenceCode : "";
   const title = typeof p.title === "string" ? p.title : "";
@@ -37,4 +39,24 @@ export function getNotificationCopy(n: Notification): { text: string; href: stri
     default:
       return { text: `Update on "${title}" (${ref}).`, href };
   }
+}
+
+const EMAIL_SUBJECTS: Record<string, string> = {
+  transaction_invite: "You're invited to an escrow transaction",
+  transaction_accepted: "Your transaction was accepted",
+  transaction_cancelled: "Transaction cancelled",
+  payment_submitted: "New payment proof to review",
+  payment_verified: "Payment verified — funds secured",
+  payment_rejected: "Your payment proof was rejected",
+  delivery_marked: "Item marked as delivered",
+  buyer_accepted: "Delivery accepted",
+  payout_ready: "Transaction ready for payout",
+  dispute_opened: "A dispute was opened",
+  dispute_resolved: "Your dispute was resolved",
+  payout_released: "Funds released",
+  new_message: "New message on your transaction",
+};
+
+export function getNotificationEmailSubject(type: string): string {
+  return EMAIL_SUBJECTS[type] ?? "Update on your transaction";
 }

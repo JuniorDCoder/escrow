@@ -1,6 +1,10 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getNotificationCopy, getNotificationEmailSubject } from "@/lib/domain/notifications";
+import { notificationEmail } from "@/lib/email/templates";
+import { sendEmail } from "@/lib/email/send";
+import { SITE_URL } from "@/lib/constants";
 import type { Profile } from "@/lib/types/database";
 
 export class AuthError extends Error {}
@@ -54,6 +58,23 @@ export async function insertSystemMessage(admin: AdminClient, transactionId: str
   if (error) throw error;
 }
 
+/**
+ * Best-effort — never lets an email hiccup fail the caller's DB write,
+ * since the in-app notification row is the source of truth either way.
+ */
+async function emailNotificationRecipient(email: string, type: string, payload: Record<string, unknown>) {
+  const { text, href } = getNotificationCopy({ type, payload });
+  await sendEmail({
+    to: email,
+    subject: getNotificationEmailSubject(type),
+    html: notificationEmail({
+      headline: getNotificationEmailSubject(type),
+      body: text,
+      actionUrl: href ? `${SITE_URL}${href}` : SITE_URL,
+    }),
+  });
+}
+
 export async function notifyUser(
   admin: AdminClient,
   userId: string,
@@ -62,15 +83,22 @@ export async function notifyUser(
 ) {
   const { error } = await admin.from("notifications").insert({ user_id: userId, type, payload });
   if (error) throw error;
+
+  const { data: recipient } = await admin.from("profiles").select("email").eq("id", userId).single();
+  if (recipient?.email) {
+    await emailNotificationRecipient(recipient.email, type, payload);
+  }
 }
 
 export async function notifyAdmins(admin: AdminClient, type: string, payload: Record<string, unknown>) {
-  const { data: admins } = await admin.from("profiles").select("id").eq("is_admin", true);
+  const { data: admins } = await admin.from("profiles").select("id, email").eq("is_admin", true);
   if (admins?.length) {
     const { error } = await admin
       .from("notifications")
       .insert(admins.map((a) => ({ user_id: a.id, type, payload })));
     if (error) throw error;
+
+    await Promise.all(admins.map((a) => (a.email ? emailNotificationRecipient(a.email, type, payload) : undefined)));
   }
 }
 
