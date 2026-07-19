@@ -6,7 +6,7 @@ import { getTransactionDetail } from "@/lib/data/transactions";
 import { getActivePaymentMethods } from "@/lib/data/payment-methods";
 import { getSettings } from "@/lib/data/settings";
 import { getViewerRole, isBuyerSide, isSellerSide } from "@/lib/domain/permissions";
-import { STATUS_DESCRIPTIONS } from "@/lib/domain/state-machine";
+import { PAYOUT_ELIGIBLE_STATUSES, STATUS_DESCRIPTIONS } from "@/lib/domain/state-machine";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { APP_NAME } from "@/lib/constants";
 
@@ -18,6 +18,7 @@ import { AcceptInviteActions } from "@/components/transactions/accept-invite-act
 import { PaymentInstructions } from "@/components/transactions/payment-instructions";
 import { PaymentProofDialog } from "@/components/transactions/payment-proof-dialog";
 import { DeliveryProofForm } from "@/components/transactions/delivery-proof-form";
+import { PayoutDetailsForm } from "@/components/transactions/payout-details-form";
 import { InspectionActions } from "@/components/transactions/inspection-actions";
 import { CancelTransactionButton } from "@/components/transactions/cancel-transaction-button";
 import { DisputeSummary } from "@/components/transactions/dispute-summary";
@@ -102,6 +103,17 @@ export default async function TransactionDetailPage({ params }: { params: Promis
               <CardContent className="flex flex-wrap items-center gap-2">
                 <PayoutActions transactionId={tx.id} status={tx.status} />
                 <ForceTransitionDialog transactionId={tx.id} currentStatus={tx.status} />
+                {detail.payout ? (
+                  <div className="w-full rounded-md border border-border bg-secondary/40 p-3 text-xs">
+                    <p className="font-medium uppercase tracking-wide text-muted-foreground">Seller payout details</p>
+                    <p className="mt-1">
+                      {detail.payout.method_type.replace("_", " ")} — {detail.payout.account_details}
+                    </p>
+                    {detail.payout.note && <p className="mt-1 text-muted-foreground">{detail.payout.note}</p>}
+                  </div>
+                ) : (
+                  <p className="w-full text-xs text-muted-foreground">Seller has not submitted payout details yet.</p>
+                )}
                 {detail.paymentProofs.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {detail.paymentProofs.map((p) => (
@@ -194,6 +206,9 @@ export default async function TransactionDetailPage({ params }: { params: Promis
           )}
 
           {tx.status === "funded" && sellerSide && <DeliveryProofForm transactionId={tx.id} inspectionDays={tx.inspection_period_days} />}
+          {sellerSide && (PAYOUT_ELIGIBLE_STATUSES.includes(tx.status) || detail.payout) && (
+            <PayoutDetailsForm transactionId={tx.id} payout={detail.payout} />
+          )}
           {tx.status === "funded" && buyerSide && (
             <Card>
               <CardContent className="py-5 text-sm text-muted-foreground">

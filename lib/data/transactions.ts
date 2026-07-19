@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { reconcileInspectionWindow } from "@/lib/actions/transactions";
 import { getSignedFileUrl } from "@/lib/data/storage";
-import type { DeliveryProof, Dispute, Message, PaymentProof, Rating, Transaction } from "@/lib/types/database";
+import type { DeliveryProof, Dispute, Message, PaymentProof, Payout, Rating, Transaction } from "@/lib/types/database";
 
 export async function getUserTransactions(): Promise<Transaction[]> {
   const supabase = await createClient();
@@ -22,6 +22,7 @@ export interface TransactionDetail {
   disputes: Dispute[];
   messages: Message[];
   ratings: Rating[];
+  payout: Payout | null;
 }
 
 export async function getTransactionDetail(id: string): Promise<TransactionDetail | null> {
@@ -32,19 +33,28 @@ export async function getTransactionDetail(id: string): Promise<TransactionDetai
 
   const transaction = await reconcileInspectionWindow(txRow as Transaction);
 
-  const [profilesResult, paymentProofsResult, deliveryProofsResult, disputesResult, messagesResult, ratingsResult, paymentMethodsResult] =
-    await Promise.all([
-      supabase
-        .from("profile_public")
-        .select("*")
-        .in("id", [transaction.buyer_id, transaction.seller_id].filter((v): v is string => !!v)),
-      supabase.from("payment_proofs").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
-      supabase.from("delivery_proofs").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
-      supabase.from("disputes").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
-      supabase.from("messages").select("*").eq("transaction_id", id).order("created_at", { ascending: true }),
-      supabase.from("ratings").select("*").eq("transaction_id", id),
-      supabase.from("payment_methods").select("id, label"),
-    ]);
+  const [
+    profilesResult,
+    paymentProofsResult,
+    deliveryProofsResult,
+    disputesResult,
+    messagesResult,
+    ratingsResult,
+    paymentMethodsResult,
+    payoutResult,
+  ] = await Promise.all([
+    supabase
+      .from("profile_public")
+      .select("*")
+      .in("id", [transaction.buyer_id, transaction.seller_id].filter((v): v is string => !!v)),
+    supabase.from("payment_proofs").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
+    supabase.from("delivery_proofs").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
+    supabase.from("disputes").select("*").eq("transaction_id", id).order("created_at", { ascending: false }),
+    supabase.from("messages").select("*").eq("transaction_id", id).order("created_at", { ascending: true }),
+    supabase.from("ratings").select("*").eq("transaction_id", id),
+    supabase.from("payment_methods").select("id, label"),
+    supabase.from("payouts").select("*").eq("transaction_id", id).maybeSingle(),
+  ]);
 
   const profileMap = new Map((profilesResult.data ?? []).map((p) => [p.id, p.full_name]));
   const methodLabelMap = new Map((paymentMethodsResult.data ?? []).map((m) => [m.id, m.label]));
@@ -66,6 +76,7 @@ export async function getTransactionDetail(id: string): Promise<TransactionDetai
     disputes: disputesResult.data ?? [],
     messages: messagesResult.data ?? [],
     ratings: ratingsResult.data ?? [],
+    payout: payoutResult.data ?? null,
   };
 }
 

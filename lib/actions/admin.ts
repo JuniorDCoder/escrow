@@ -110,6 +110,11 @@ export async function confirmPayoutAction(transactionId: string): Promise<Action
     const { error: updateError } = await admin.from("transactions").update({ status: "released" }).eq("id", tx.id);
     if (updateError) throw updateError;
 
+    await admin
+      .from("payouts")
+      .update({ status: "paid", paid_by: profile.id, paid_at: new Date().toISOString() })
+      .eq("transaction_id", tx.id);
+
     await insertSystemMessage(admin, tx.id, `Payout confirmed by ${APP_NAME}. This transaction is complete.`);
     if (tx.seller_id) await notifyUser(admin, tx.seller_id, "payout_released", { transactionId: tx.id, referenceCode: tx.reference_code });
     if (tx.buyer_id) await notifyUser(admin, tx.buyer_id, "payout_released", { transactionId: tx.id, referenceCode: tx.reference_code });

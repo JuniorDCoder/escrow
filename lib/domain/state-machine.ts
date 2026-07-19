@@ -128,6 +128,16 @@ export function isDisputeStatus(status: TransactionStatus): boolean {
   return status === "disputed" || status === "resolved_buyer" || status === "resolved_seller" || status === "resolved_split";
 }
 
+// Statuses at which the Seller may set/edit where their payout should go —
+// from the moment funds are secured through to the payout being queued.
+export const PAYOUT_ELIGIBLE_STATUSES: TransactionStatus[] = [
+  "funded",
+  "delivered",
+  "inspection_period",
+  "accepted",
+  "release_pending",
+];
+
 export function statusBadgeVariant(status: TransactionStatus): "default" | "secondary" | "outline" | "secured" | "success" | "warning" | "destructive" {
   switch (status) {
     case "funded":

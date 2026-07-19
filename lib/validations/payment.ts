@@ -22,6 +22,15 @@ export const submitDeliveryProofSchema = z.object({
   trackingReference: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
+export const payoutDetailsSchema = z.object({
+  transactionId: z.string().uuid(),
+  methodType: z.enum(["bank_transfer", "crypto", "mobile_money", "other"]),
+  accountDetails: z.string().trim().min(3, "Provide the account or wallet details to pay you out to").max(1000),
+  note: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export type PayoutDetailsInput = z.infer<typeof payoutDetailsSchema>;
+
 export const paymentMethodSchema = z.object({
   id: z.string().uuid().optional(),
   type: z.enum(["bank_transfer", "crypto", "mobile_money", "other"]),

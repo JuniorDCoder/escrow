@@ -180,6 +180,23 @@ export type AdminAction = {
   created_at: string;
 };
 
+export type PayoutStatus = "pending" | "paid";
+
+export type Payout = {
+  id: string;
+  transaction_id: string;
+  seller_id: string;
+  method_type: PaymentMethodType;
+  account_details: string;
+  note: string | null;
+  status: PayoutStatus;
+  admin_note: string | null;
+  paid_by: string | null;
+  paid_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type TableDef<Row, RequiredInsertKeys extends keyof Row> = {
   Row: Row;
   Insert: Partial<Row> & Pick<Row, RequiredInsertKeys>;
@@ -207,6 +224,7 @@ export type Database = {
       ratings: TableDef<Rating, "transaction_id" | "rated_by" | "rated_user" | "score">;
       settings: TableDef<Settings, never>;
       admin_actions: TableDef<AdminAction, "admin_id" | "action" | "target_table" | "target_id">;
+      payouts: TableDef<Payout, "transaction_id" | "seller_id" | "method_type" | "account_details">;
     };
     Views: {
       profile_public: {

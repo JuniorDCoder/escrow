@@ -28,6 +28,8 @@ export function getNotificationCopy(n: NotificationLike): { text: string; href: 
       return { text: `Delivery accepted for "${title}" (${ref}).`, href };
     case "payout_ready":
       return { text: `"${title}" (${ref}) is ready for payout.`, href };
+    case "payout_details_submitted":
+      return { text: `The Seller submitted payout details for "${title}" (${ref}).`, href };
     case "dispute_opened":
       return { text: `A dispute was opened on "${title}" (${ref}).`, href };
     case "dispute_resolved":
@@ -51,6 +53,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   delivery_marked: "Item marked as delivered",
   buyer_accepted: "Delivery accepted",
   payout_ready: "Transaction ready for payout",
+  payout_details_submitted: "Seller submitted payout details",
   dispute_opened: "A dispute was opened",
   dispute_resolved: "Your dispute was resolved",
   payout_released: "Funds released",
