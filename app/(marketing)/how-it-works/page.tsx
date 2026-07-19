@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
+import { getIsAuthenticated } from "@/lib/data/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -40,7 +41,9 @@ const STAGES = [
   },
 ];
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  const isAuthenticated = await getIsAuthenticated();
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <div className="mb-12 text-center">
@@ -76,7 +79,9 @@ export default function HowItWorksPage() {
 
       <div className="mt-10 text-center">
         <Button asChild size="lg">
-          <Link href="/auth/signup">Start your first transaction</Link>
+          <Link href={isAuthenticated ? "/dashboard" : "/auth/signup"}>
+            {isAuthenticated ? "Go to your dashboard" : "Start your first transaction"}
+          </Link>
         </Button>
       </div>
     </div>

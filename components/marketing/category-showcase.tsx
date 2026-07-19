@@ -12,13 +12,13 @@ const CATEGORIES = [
   { icon: Boxes, label: "And more" },
 ];
 
-export function CategoryShowcase() {
+export function CategoryShowcase({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   return (
     <div className="flex flex-wrap justify-center gap-3">
       {CATEGORIES.map((c, i) => (
         <Reveal key={c.label} delay={i * 0.05}>
           <Link
-            href="/auth/signup"
+            href={isAuthenticated ? "/dashboard" : "/auth/signup"}
             className="group flex items-center gap-2.5 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">

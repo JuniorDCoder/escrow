@@ -2,7 +2,15 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 
-export function SiteFooter({ appName, whatsappNumber }: { appName: string; whatsappNumber: string | null }) {
+export function SiteFooter({
+  appName,
+  whatsappNumber,
+  isAuthenticated = false,
+}: {
+  appName: string;
+  whatsappNumber: string | null;
+  isAuthenticated?: boolean;
+}) {
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -26,8 +34,14 @@ export function SiteFooter({ appName, whatsappNumber }: { appName: string; whats
           <div className="space-y-2">
             <p className="text-sm font-medium">Company</p>
             <FooterLink href="/contact">Contact</FooterLink>
-            <FooterLink href="/auth/login">Log in</FooterLink>
-            <FooterLink href="/auth/signup">Sign up</FooterLink>
+            {isAuthenticated ? (
+              <FooterLink href="/dashboard">Dashboard</FooterLink>
+            ) : (
+              <>
+                <FooterLink href="/auth/login">Log in</FooterLink>
+                <FooterLink href="/auth/signup">Sign up</FooterLink>
+              </>
+            )}
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">Legal</p>

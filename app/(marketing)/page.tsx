@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ShieldCheck, FileCheck, PackageCheck, HandCoins, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { getSettings } from "@/lib/data/settings";
-import { createClient } from "@/lib/supabase/server";
+import { getIsAuthenticated } from "@/lib/data/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FeeCalculator } from "@/components/marketing/fee-calculator";
@@ -26,18 +26,6 @@ const STEPS = [
   { icon: PackageCheck, title: "Seller delivers", body: "Once funds are secured, the Seller ships the item, hands over the domain, or completes the work." },
   { icon: Lock, title: "Buyer accepts & funds release", body: "Buyer inspects and accepts (or it auto-completes) — then we release payment to the Seller." },
 ];
-
-async function getIsAuthenticated() {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return !!user;
-  } catch {
-    return false;
-  }
-}
 
 export default async function LandingPage() {
   const [settings, isAuthenticated] = await Promise.all([getSettings(), getIsAuthenticated()]);
@@ -135,7 +123,7 @@ export default async function LandingPage() {
               <p className="mt-2 text-muted-foreground">Pick a category when you create a transaction — more are always welcome.</p>
             </div>
           </Reveal>
-          <CategoryShowcase />
+          <CategoryShowcase isAuthenticated={isAuthenticated} />
         </div>
       </section>
 
@@ -182,7 +170,9 @@ export default async function LandingPage() {
                 Create a transaction, invite the other party, and let us hold the funds until the work is done.
               </p>
               <Button asChild size="lg" variant="secondary">
-                <Link href="/auth/signup">Get started for free</Link>
+                <Link href={isAuthenticated ? "/dashboard" : "/auth/signup"}>
+                  {isAuthenticated ? "Go to your dashboard" : "Get started for free"}
+                </Link>
               </Button>
             </CardContent>
           </Card>

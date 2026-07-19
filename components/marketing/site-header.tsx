@@ -15,7 +15,7 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function SiteHeader({ appName }: { appName: string }) {
+export function SiteHeader({ appName, isAuthenticated = false }: { appName: string; isAuthenticated?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -43,12 +43,20 @@ export function SiteHeader({ appName }: { appName: string }) {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/auth/login">Log in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/auth/signup">Get started</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button asChild size="sm">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/auth/login">Log in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/auth/signup">Get started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <button className="md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu">
@@ -70,12 +78,26 @@ export function SiteHeader({ appName }: { appName: string }) {
               </Link>
             ))}
             <div className="mt-2 flex gap-2 px-3">
-              <Button asChild variant="outline" size="sm" className="flex-1">
-                <Link href="/auth/login">Log in</Link>
-              </Button>
-              <Button asChild size="sm" className="flex-1">
-                <Link href="/auth/signup">Get started</Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button asChild size="sm" className="flex-1">
+                  <Link href="/dashboard" onClick={() => setOpen(false)}>
+                    Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link href="/auth/login" onClick={() => setOpen(false)}>
+                      Log in
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="flex-1">
+                    <Link href="/auth/signup" onClick={() => setOpen(false)}>
+                      Get started
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
