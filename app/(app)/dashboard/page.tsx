@@ -3,18 +3,32 @@ import Link from "next/link";
 import { Plus, ArrowRight, Inbox } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTransactions } from "@/lib/data/transactions";
+import { getViewerRole } from "@/lib/domain/permissions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/transactions/status-badge";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Dashboard" };
+
+const ROLE_LABELS = {
+  buyer: "Buyer",
+  seller: "Seller",
+  buyer_invitee: "Buyer (pending)",
+  seller_invitee: "Seller (pending)",
+  admin: "Admin",
+  observer: "Party",
+} as const;
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("*").eq("id", user.id).single()
+    : { data: null };
   const transactions = await getUserTransactions();
 
   return (
@@ -48,8 +62,10 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-3">
           {transactions.map((tx) => {
-            const role = tx.buyer_id === user?.id ? "Buyer" : tx.seller_id === user?.id ? "Seller" : "Party";
-            const counterpart = role === "Buyer" ? tx.seller_email : tx.buyer_email;
+            const role = user && profile ? getViewerRole(tx, user.id, profile) : "observer";
+            const isBuyerSide = role === "buyer" || role === "buyer_invitee";
+            const counterpart = isBuyerSide ? tx.seller_email : tx.buyer_email;
+            const pending = role === "buyer_invitee" || role === "seller_invitee";
             return (
               <Link key={tx.id} href={`/transactions/${tx.id}`}>
                 <Card className="transition-colors hover:border-primary/40">
@@ -58,9 +74,10 @@ export default async function DashboardPage() {
                       <div className="flex items-center gap-2">
                         <span className="truncate font-medium">{tx.title}</span>
                         <StatusBadge status={tx.status} />
+                        {pending && <Badge variant="warning">Action needed</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        <span className="font-mono">{tx.reference_code}</span> · You&apos;re the {role} · with{" "}
+                        <span className="font-mono">{tx.reference_code}</span> · You&apos;re the {ROLE_LABELS[role]} · with{" "}
                         {counterpart ?? "unknown"} · updated {formatDateShort(tx.updated_at)}
                       </p>
                     </div>

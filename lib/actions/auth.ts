@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { loginSchema, requestResetSchema, signupSchema, updatePasswordSchema } from "@/lib/validations/auth";
 import { SITE_URL } from "@/lib/constants";
 
@@ -35,11 +34,6 @@ export async function signUpAction(input: unknown): Promise<SignUpResult> {
     return { error: error.message };
   }
 
-  // Claim any transactions this person was invited to before they had an account.
-  if (data.user) {
-    await claimInvitedTransactions(data.user.id, email);
-  }
-
   return { needsConfirmation: !data.session };
 }
 
@@ -51,14 +45,10 @@ export async function loginAction(input: unknown): Promise<ActionResult> {
   const { email, password } = parsed.data;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: "Incorrect email or password." };
-  }
-
-  if (data.user) {
-    await claimInvitedTransactions(data.user.id, email);
   }
 
   return {};
@@ -98,31 +88,4 @@ export async function updatePasswordAction(input: unknown): Promise<ActionResult
     return { error: error.message };
   }
   return {};
-}
-
-/**
- * When someone signs up or logs in, link any transactions where they were
- * invited by email (buyer_email/seller_email) but no account existed yet.
- * Uses the service-role client because this write touches rows the user
- * doesn't already own via buyer_id/seller_id.
- */
-async function claimInvitedTransactions(userId: string, email: string) {
-  const admin = createAdminClient();
-  const lowerEmail = email.toLowerCase();
-
-  const { data: asBuyer } = await admin
-    .from("transactions")
-    .update({ buyer_id: userId })
-    .is("buyer_id", null)
-    .eq("buyer_email", lowerEmail)
-    .select("id");
-
-  const { data: asSeller } = await admin
-    .from("transactions")
-    .update({ seller_id: userId })
-    .is("seller_id", null)
-    .eq("seller_email", lowerEmail)
-    .select("id");
-
-  return { linked: (asBuyer?.length ?? 0) + (asSeller?.length ?? 0) };
 }
