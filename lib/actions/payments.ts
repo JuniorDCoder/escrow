@@ -12,6 +12,7 @@ import {
 } from "./_shared";
 import { assertTransition } from "@/lib/domain/state-machine";
 import { submitPaymentProofSchema } from "@/lib/validations/payment";
+import { APP_NAME } from "@/lib/constants";
 import type { ActionResult } from "./transactions";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -76,7 +77,7 @@ export async function submitPaymentProofAction(formData: FormData): Promise<Acti
     await insertSystemMessage(
       admin,
       tx.id,
-      `${profile.full_name || profile.email} submitted proof of payment. An Admin will verify it shortly.`
+      `${profile.full_name || profile.email} submitted proof of payment. ${APP_NAME} will verify it shortly.`
     );
     await notifyAdmins(admin, "payment_submitted", {
       transactionId: tx.id,

@@ -37,7 +37,7 @@ export function DisputeSummary({ disputes }: { disputes: Dispute[] }) {
             <p className="text-sm">{d.reason}</p>
             {d.resolution_note && (
               <div className="rounded-md bg-secondary/60 p-3 text-sm">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Admin resolution</p>
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Resolution</p>
                 <p>{d.resolution_note}</p>
               </div>
             )}

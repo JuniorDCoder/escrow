@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { openDisputeAction } from "@/lib/actions/transactions";
 import { disputeSchema, type DisputeInput } from "@/lib/validations/transaction";
+import { APP_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -43,7 +44,7 @@ export function DisputeForm({ transactionId }: { transactionId: string }) {
       <CardHeader>
         <CardTitle>Open a dispute</CardTitle>
         <CardDescription>
-          Explain what went wrong. An Admin will review evidence from both sides and decide how to proceed — this pauses the
+          Explain what went wrong. {APP_NAME} will review evidence from both sides and decide how to proceed — this pauses the
           transaction until it&apos;s resolved.
         </CardDescription>
       </CardHeader>

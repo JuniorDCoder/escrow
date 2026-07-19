@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/constants";
 import type { TransactionStatus } from "@/lib/types/database";
 
 /**
@@ -71,16 +72,16 @@ export const STATUS_DESCRIPTIONS: Record<TransactionStatus, string> = {
   draft: "This transaction hasn't been sent yet.",
   awaiting_acceptance: "Waiting for the other party to review and accept the terms.",
   awaiting_payment: "The Buyer needs to pay into escrow and upload proof of payment.",
-  payment_under_review: "An Admin is verifying the Buyer's payment proof. This is usually quick.",
+  payment_under_review: `${APP_NAME} is verifying the Buyer's payment proof. This is usually quick.`,
   funded: "Payment is secured in escrow. The Seller should now deliver the item or service.",
   delivered: "The Seller has marked the item as delivered.",
   inspection_period: "The Buyer can inspect the delivery and accept, or raise a dispute, before the window closes.",
   accepted: "The Buyer has accepted the delivery. Payout to the Seller is being queued.",
-  disputed: "A dispute is open. An Admin is reviewing evidence from both sides.",
+  disputed: `A dispute is open. ${APP_NAME} is reviewing evidence from both sides.`,
   resolved_buyer: "The dispute was resolved in the Buyer's favor. A refund is being processed.",
   resolved_seller: "The dispute was resolved in the Seller's favor. Payout is being processed.",
-  resolved_split: "The dispute was resolved with a split outcome. An Admin is processing it manually.",
-  release_pending: "An Admin is completing the payout to the Seller.",
+  resolved_split: `The dispute was resolved with a split outcome. ${APP_NAME} is processing it manually.`,
+  release_pending: `${APP_NAME} is completing the payout to the Seller.`,
   released: "Funds have been released to the Seller. This transaction is complete.",
   refunded: "Funds have been refunded to the Buyer. This transaction is complete.",
   cancelled: "This transaction was cancelled before any funds moved.",

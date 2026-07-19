@@ -8,6 +8,7 @@ import { getSettings } from "@/lib/data/settings";
 import { getViewerRole, isBuyerSide, isSellerSide } from "@/lib/domain/permissions";
 import { STATUS_DESCRIPTIONS } from "@/lib/domain/state-machine";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { APP_NAME } from "@/lib/constants";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -170,7 +171,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
                 <CardTitle>Payment under review</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>An Admin is verifying the payment proof. This is usually quick.</p>
+                <p>{APP_NAME} is verifying the payment proof. This is usually quick.</p>
                 {buyerSide && latestProof && (
                   <p>
                     Submitted {formatCurrency(latestProof.amount_claimed, latestProof.currency)} via{" "}
@@ -217,8 +218,8 @@ export default async function TransactionDetailPage({ params }: { params: Promis
             <Card>
               <CardContent className="py-5 text-sm text-muted-foreground">
                 {tx.status === "accepted"
-                  ? "Delivery accepted. An Admin will queue the payout to the Seller shortly."
-                  : "An Admin is completing the payout to the Seller."}
+                  ? `Delivery accepted. ${APP_NAME} will queue the payout to the Seller shortly.`
+                  : `${APP_NAME} is completing the payout to the Seller.`}
               </CardContent>
             </Card>
           )}

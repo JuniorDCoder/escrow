@@ -21,7 +21,7 @@ import {
 } from "@/lib/validations/transaction";
 import { submitDeliveryProofSchema } from "@/lib/validations/payment";
 import { getSettings } from "@/lib/data/settings";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, APP_NAME } from "@/lib/constants";
 import { sendEmail } from "@/lib/email/send";
 import { transactionInviteEmail } from "@/lib/email/templates";
 import { formatCurrency } from "@/lib/utils";
@@ -326,7 +326,7 @@ export async function openDisputeAction(input: unknown): Promise<ActionResult> {
     const { error: updateError } = await admin.from("transactions").update({ status: "disputed" }).eq("id", tx.id);
     if (updateError) throw updateError;
 
-    await insertSystemMessage(admin, tx.id, `${profile.full_name || profile.email} opened a dispute. An Admin will review the case.`);
+    await insertSystemMessage(admin, tx.id, `${profile.full_name || profile.email} opened a dispute. ${APP_NAME} will review the case.`);
     const otherPartyId = tx.buyer_id === user.id ? tx.seller_id : tx.buyer_id;
     if (otherPartyId) {
       await notifyUser(admin, otherPartyId, "dispute_opened", { transactionId: tx.id, referenceCode: tx.reference_code, title: tx.title });

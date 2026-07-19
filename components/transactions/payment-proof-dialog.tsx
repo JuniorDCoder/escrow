@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitPaymentProofAction } from "@/lib/actions/payments";
+import { APP_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,7 +61,7 @@ export function PaymentProofDialog({ transactionId, amountDue, currency, methods
         <DialogHeader>
           <DialogTitle>Submit proof of payment</DialogTitle>
           <DialogDescription>
-            Upload a screenshot or receipt showing the transfer. An Admin will verify it and secure the funds.
+            Upload a screenshot or receipt showing the transfer. {APP_NAME} will verify it and secure the funds.
           </DialogDescription>
         </DialogHeader>
         <form ref={formRef} onSubmit={onSubmit} className="space-y-4">

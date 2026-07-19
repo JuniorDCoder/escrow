@@ -19,6 +19,7 @@ import {
   updateUserSchema,
 } from "@/lib/validations/admin";
 import { paymentMethodSchema, reviewPaymentProofSchema } from "@/lib/validations/payment";
+import { APP_NAME } from "@/lib/constants";
 import type { ActionResult } from "./transactions";
 import type { Profile, TransactionStatus } from "@/lib/types/database";
 
@@ -56,11 +57,11 @@ export async function reviewPaymentProofAction(input: unknown): Promise<ActionRe
     if (updateTxError) throw updateTxError;
 
     if (decision === "verify") {
-      await insertSystemMessage(admin, tx.id, "Payment verified by Admin. Funds are now secured in escrow.");
+      await insertSystemMessage(admin, tx.id, `Payment verified by ${APP_NAME}. Funds are now secured in escrow.`);
       if (tx.buyer_id) await notifyUser(admin, tx.buyer_id, "payment_verified", { transactionId: tx.id, referenceCode: tx.reference_code });
       if (tx.seller_id) await notifyUser(admin, tx.seller_id, "payment_verified", { transactionId: tx.id, referenceCode: tx.reference_code });
     } else {
-      await insertSystemMessage(admin, tx.id, `Payment proof rejected by Admin${note ? `: ${note}` : "."} Please resubmit.`);
+      await insertSystemMessage(admin, tx.id, `Payment proof rejected by ${APP_NAME}${note ? `: ${note}` : "."} Please resubmit.`);
       if (tx.buyer_id) await notifyUser(admin, tx.buyer_id, "payment_rejected", { transactionId: tx.id, referenceCode: tx.reference_code, note });
     }
 
@@ -86,7 +87,7 @@ export async function queuePayoutAction(transactionId: string): Promise<ActionRe
     const { error: updateError } = await admin.from("transactions").update({ status: "release_pending" }).eq("id", tx.id);
     if (updateError) throw updateError;
 
-    await insertSystemMessage(admin, tx.id, "Payout to the Seller has been queued by Admin.");
+    await insertSystemMessage(admin, tx.id, `Payout to the Seller has been queued by ${APP_NAME}.`);
     await logAdminAction(admin, profile.id, "queue_payout", "transactions", tx.id);
 
     revalidatePath("/admin/transactions");
@@ -109,7 +110,7 @@ export async function confirmPayoutAction(transactionId: string): Promise<Action
     const { error: updateError } = await admin.from("transactions").update({ status: "released" }).eq("id", tx.id);
     if (updateError) throw updateError;
 
-    await insertSystemMessage(admin, tx.id, "Payout confirmed by Admin. This transaction is complete.");
+    await insertSystemMessage(admin, tx.id, `Payout confirmed by ${APP_NAME}. This transaction is complete.`);
     if (tx.seller_id) await notifyUser(admin, tx.seller_id, "payout_released", { transactionId: tx.id, referenceCode: tx.reference_code });
     if (tx.buyer_id) await notifyUser(admin, tx.buyer_id, "payout_released", { transactionId: tx.id, referenceCode: tx.reference_code });
     await logAdminAction(admin, profile.id, "confirm_payout", "transactions", tx.id);
@@ -150,7 +151,7 @@ export async function resolveDisputeAction(input: unknown): Promise<ActionResult
     const { error: updateTxError } = await admin.from("transactions").update({ status: resolution }).eq("id", tx.id);
     if (updateTxError) throw updateTxError;
 
-    await insertSystemMessage(admin, tx.id, `Dispute resolved by Admin: ${note}`);
+    await insertSystemMessage(admin, tx.id, `Dispute resolved by ${APP_NAME}: ${note}`);
     if (tx.buyer_id) await notifyUser(admin, tx.buyer_id, "dispute_resolved", { transactionId: tx.id, referenceCode: tx.reference_code, resolution });
     if (tx.seller_id) await notifyUser(admin, tx.seller_id, "dispute_resolved", { transactionId: tx.id, referenceCode: tx.reference_code, resolution });
     await logAdminAction(admin, profile.id, `dispute_${resolution}`, "disputes", disputeId, note);
@@ -181,7 +182,7 @@ export async function forceTransitionAction(input: unknown): Promise<ActionResul
     const { error: updateError } = await admin.from("transactions").update({ status: nextStatus }).eq("id", tx.id);
     if (updateError) throw updateError;
 
-    await insertSystemMessage(admin, tx.id, `Admin force-moved this transaction to "${nextStatus}". Reason: ${note}`);
+    await insertSystemMessage(admin, tx.id, `${APP_NAME} force-moved this transaction to "${nextStatus}". Reason: ${note}`);
     await logAdminAction(admin, profile.id, `force_transition_to_${nextStatus}`, "transactions", tx.id, note);
 
     revalidatePath("/admin/transactions");
