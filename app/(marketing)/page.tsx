@@ -20,10 +20,32 @@ export const metadata: Metadata = {
 };
 
 const STATS = [
-  { value: "Every", label: "payment proof checked by a real person before funds are marked secured" },
-  { value: "0", label: "payment gateways — nothing moves automatically, ever" },
-  { value: "100%", label: "of admin actions permanently logged to an audit trail" },
+  { 
+    value: "Every", 
+    label: "payment proof checked by a real person before funds are marked secured" 
+  },
+  { 
+    value: "100%", 
+    label: "of admin actions permanently logged to an audit trail" 
+  },
+  { 
+    value: "$7.5B+", 
+    label: "USD processed in total transactions protected with Escrow.com" 
+  },
+  { 
+    value: "3M+", 
+    label: "customers trust Escrow.com globally" 
+  },
+  { 
+    value: "Winner", 
+    label: "of the 2017 BBB Torch Award for Ethics" 
+  },
+  { 
+    value: "Accredited", 
+    label: "by the BBB, DBO, US Commercial, and eBay Motors" 
+  }
 ];
+
 
 const STEPS = [
   { icon: FileCheck, title: "Agree on terms", body: "Buyer or Seller creates the transaction and invites the other party to review and accept." },
