@@ -30,7 +30,7 @@ const STATS = [
   },
   { 
     value: "$7.5B+", 
-    label: "USD processed in total transactions protected with Escrow.com" 
+    label: "USD processed in total transactions protected with EscrowTrustLock.com" 
   },
   { 
     value: "3M+", 
