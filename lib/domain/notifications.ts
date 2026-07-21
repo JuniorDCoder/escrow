@@ -16,6 +16,10 @@ export function getNotificationCopy(n: NotificationLike): { text: string; href: 
       return { text: `The other party accepted "${title}" (${ref}).`, href };
     case "transaction_cancelled":
       return { text: `"${title}" (${ref}) was cancelled.`, href };
+    case "transaction_deleted": {
+      const actorLabel = typeof p.actorLabel === "string" ? p.actorLabel : "The other party";
+      return { text: `${actorLabel} deleted "${title}" (${ref}).`, href: null };
+    }
     case "payment_submitted":
       return { text: `New payment proof submitted for "${title}" (${ref}).`, href };
     case "payment_verified":
@@ -47,6 +51,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   transaction_invite: "You're invited to an escrow transaction",
   transaction_accepted: "Your transaction was accepted",
   transaction_cancelled: "Transaction cancelled",
+  transaction_deleted: "Transaction deleted",
   payment_submitted: "New payment proof to review",
   payment_verified: "Payment verified — funds secured",
   payment_rejected: "Your payment proof was rejected",

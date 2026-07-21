@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { getAllTransactionsForAdmin } from "@/lib/data/admin";
-import { STATUS_LABELS } from "@/lib/domain/state-machine";
+import { SELF_DELETABLE_STATUSES, STATUS_LABELS } from "@/lib/domain/state-machine";
 import { StatusBadge } from "@/components/transactions/status-badge";
 import { ForceTransitionDialog } from "@/components/admin/force-transition-dialog";
 import { PayoutActions } from "@/components/admin/payout-actions";
+import { DeleteTransactionDialog } from "@/components/transactions/delete-transaction-dialog";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 
@@ -73,6 +76,18 @@ export default async function AdminTransactionsPage({
                   <div className="flex justify-end gap-2">
                     <PayoutActions transactionId={tx.id} status={tx.status} />
                     <ForceTransitionDialog transactionId={tx.id} currentStatus={tx.status} />
+                    <DeleteTransactionDialog
+                      transactionId={tx.id}
+                      referenceCode={tx.reference_code}
+                      isAdmin
+                      requireNote={!SELF_DELETABLE_STATUSES.includes(tx.status)}
+                      redirectTo={false}
+                      trigger={
+                        <Button variant="outline" size="sm" className="border-destructive/40 text-destructive hover:bg-destructive/10">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      }
+                    />
                   </div>
                 </TableCell>
               </TableRow>

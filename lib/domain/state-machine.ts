@@ -138,6 +138,17 @@ export const PAYOUT_ELIGIBLE_STATUSES: TransactionStatus[] = [
   "release_pending",
 ];
 
+// Statuses at which no funds have moved (or the deal is already inert), so
+// the transaction's creator — not just an Admin — can hard-delete it
+// without destroying financial history. Past this point, deletion is
+// Admin-only (still logged to admin_actions for the audit trail).
+export const SELF_DELETABLE_STATUSES: TransactionStatus[] = [
+  "draft",
+  "awaiting_acceptance",
+  "awaiting_payment",
+  "cancelled",
+];
+
 export function statusBadgeVariant(status: TransactionStatus): "default" | "secondary" | "outline" | "secured" | "success" | "warning" | "destructive" {
   switch (status) {
     case "funded":

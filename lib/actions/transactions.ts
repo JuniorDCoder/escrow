@@ -7,12 +7,13 @@ import {
   insertSystemMessage,
   notifyUser,
   notifyAdmins,
+  logAdminAction,
   toActionError,
   ForbiddenError,
   NotFoundError,
   ValidationError,
 } from "./_shared";
-import { assertTransition } from "@/lib/domain/state-machine";
+import { assertTransition, SELF_DELETABLE_STATUSES } from "@/lib/domain/state-machine";
 import { calculateFee } from "@/lib/domain/fees";
 import {
   createTransactionSchema,
@@ -226,6 +227,75 @@ export async function cancelTransactionAction(transactionId: string): Promise<Ac
 
     revalidatePath(`/transactions/${tx.id}`);
     revalidatePath("/dashboard");
+    return {};
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+/**
+ * Hard-deletes a transaction and everything attached to it (payment/delivery
+ * proofs, disputes, messages, ratings, payouts — all `on delete cascade` at
+ * the DB level, plus the underlying Storage files for any uploaded proofs).
+ * The creator may only do this before any funds have moved
+ * (SELF_DELETABLE_STATUSES); Admin can delete at any status, but that's
+ * logged to admin_actions first since the transaction row itself won't
+ * survive to tell the story afterward.
+ */
+export async function deleteTransactionAction(transactionId: string, note?: string): Promise<ActionResult> {
+  try {
+    const { user, profile, tx } = await loadOwnedTransaction(transactionId);
+
+    if (tx.created_by !== user.id && !profile.is_admin) {
+      throw new ForbiddenError("Only the transaction's creator or an admin can delete it.");
+    }
+    if (!profile.is_admin && !SELF_DELETABLE_STATUSES.includes(tx.status)) {
+      throw new ValidationError(
+        "This transaction can no longer be deleted because funds are already involved. Contact support if it needs to be removed."
+      );
+    }
+    if (profile.is_admin && !SELF_DELETABLE_STATUSES.includes(tx.status) && !note?.trim()) {
+      throw new ValidationError("A reason is required to delete a transaction that funds have already touched.");
+    }
+
+    const admin = getAdminClient();
+
+    if (profile.is_admin) {
+      const context = `${tx.reference_code} — ${tx.title} (status: ${tx.status})`;
+      await logAdminAction(
+        admin,
+        profile.id,
+        "delete_transaction",
+        "transactions",
+        tx.id,
+        note?.trim() ? `${context}. Reason: ${note.trim()}` : context
+      );
+    }
+
+    const [paymentProofsResult, deliveryProofsResult] = await Promise.all([
+      admin.from("payment_proofs").select("file_url").eq("transaction_id", tx.id),
+      admin.from("delivery_proofs").select("file_url").eq("transaction_id", tx.id),
+    ]);
+    const paymentPaths = (paymentProofsResult.data ?? []).map((p) => p.file_url).filter((p): p is string => !!p);
+    const deliveryPaths = (deliveryProofsResult.data ?? []).map((p) => p.file_url).filter((p): p is string => !!p);
+    await Promise.all([
+      paymentPaths.length ? admin.storage.from("payment-proofs").remove(paymentPaths) : Promise.resolve(),
+      deliveryPaths.length ? admin.storage.from("delivery-proofs").remove(deliveryPaths) : Promise.resolve(),
+    ]);
+
+    const { error: deleteError } = await admin.from("transactions").delete().eq("id", tx.id);
+    if (deleteError) throw deleteError;
+
+    const actorLabel = profile.full_name || profile.email;
+    const recipients = [tx.buyer_id, tx.seller_id].filter((id): id is string => !!id && id !== user.id);
+    await Promise.all(
+      recipients.map((id) =>
+        notifyUser(admin, id, "transaction_deleted", { referenceCode: tx.reference_code, title: tx.title, actorLabel })
+      )
+    );
+
+    revalidatePath("/dashboard");
+    revalidatePath("/admin/transactions");
     return {};
   } catch (err) {
     return toActionError(err);

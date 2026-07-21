@@ -6,7 +6,7 @@ import { getTransactionDetail } from "@/lib/data/transactions";
 import { getActivePaymentMethods } from "@/lib/data/payment-methods";
 import { getSettings } from "@/lib/data/settings";
 import { getViewerRole, isBuyerSide, isSellerSide } from "@/lib/domain/permissions";
-import { PAYOUT_ELIGIBLE_STATUSES, STATUS_DESCRIPTIONS } from "@/lib/domain/state-machine";
+import { PAYOUT_ELIGIBLE_STATUSES, SELF_DELETABLE_STATUSES, STATUS_DESCRIPTIONS } from "@/lib/domain/state-machine";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { APP_NAME } from "@/lib/constants";
 
@@ -21,6 +21,7 @@ import { DeliveryProofForm } from "@/components/transactions/delivery-proof-form
 import { PayoutDetailsForm } from "@/components/transactions/payout-details-form";
 import { InspectionActions } from "@/components/transactions/inspection-actions";
 import { CancelTransactionButton } from "@/components/transactions/cancel-transaction-button";
+import { DeleteTransactionDialog } from "@/components/transactions/delete-transaction-dialog";
 import { DisputeSummary } from "@/components/transactions/dispute-summary";
 import { MessageThread } from "@/components/transactions/message-thread";
 import { RatingForm } from "@/components/transactions/rating-form";
@@ -93,6 +94,12 @@ export default async function TransactionDetailPage({ params }: { params: Promis
         <p>{STATUS_DESCRIPTIONS[tx.status]}</p>
       </div>
 
+      {role !== "admin" && tx.created_by === user.id && SELF_DELETABLE_STATUSES.includes(tx.status) && (
+        <div className="flex justify-end">
+          <DeleteTransactionDialog transactionId={tx.id} referenceCode={tx.reference_code} />
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {role === "admin" && (
@@ -103,6 +110,12 @@ export default async function TransactionDetailPage({ params }: { params: Promis
               <CardContent className="flex flex-wrap items-center gap-2">
                 <PayoutActions transactionId={tx.id} status={tx.status} />
                 <ForceTransitionDialog transactionId={tx.id} currentStatus={tx.status} />
+                <DeleteTransactionDialog
+                  transactionId={tx.id}
+                  referenceCode={tx.reference_code}
+                  isAdmin
+                  requireNote={!SELF_DELETABLE_STATUSES.includes(tx.status)}
+                />
                 {detail.payout ? (
                   <div className="w-full rounded-md border border-border bg-secondary/40 p-3 text-xs">
                     <p className="font-medium uppercase tracking-wide text-muted-foreground">Seller payout details</p>

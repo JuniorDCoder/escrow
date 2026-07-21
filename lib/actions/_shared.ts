@@ -70,7 +70,8 @@ async function emailNotificationRecipient(email: string, type: string, payload: 
     html: notificationEmail({
       headline: getNotificationEmailSubject(type),
       body: text,
-      actionUrl: href ? `${SITE_URL}${href}` : SITE_URL,
+      actionUrl: href ? `${SITE_URL}${href}` : `${SITE_URL}/dashboard`,
+      actionLabel: href ? "View transaction" : "Go to dashboard",
     }),
   });
 }
