@@ -180,6 +180,20 @@ export type AdminAction = {
   created_at: string;
 };
 
+export type MailEncryption = "ssl" | "tls" | "none";
+
+export type EmailSettings = {
+  id: number;
+  mail_host: string | null;
+  mail_port: number | null;
+  mail_username: string | null;
+  mail_password: string | null;
+  mail_encryption: MailEncryption | null;
+  mail_from_address: string | null;
+  mail_from_name: string | null;
+  updated_at: string;
+};
+
 export type PayoutStatus = "pending" | "paid";
 
 export type Payout = {
@@ -225,6 +239,7 @@ export type Database = {
       settings: TableDef<Settings, never>;
       admin_actions: TableDef<AdminAction, "admin_id" | "action" | "target_table" | "target_id">;
       payouts: TableDef<Payout, "transaction_id" | "seller_id" | "method_type" | "account_details">;
+      email_settings: TableDef<EmailSettings, never>;
     };
     Views: {
       profile_public: {

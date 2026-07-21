@@ -1,42 +1,67 @@
 import "server-only";
-import nodemailer, { type Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { APP_NAME } from "@/lib/constants";
 
-let cachedTransporter: Transporter | null | undefined;
-
-function getTransporter(): Transporter | null {
-  if (cachedTransporter !== undefined) return cachedTransporter;
-
-  const host = process.env.MAIL_HOST;
-  const user = process.env.MAIL_USERNAME;
-  const pass = process.env.MAIL_PASSWORD;
-  if (!host || !user || !pass) {
-    cachedTransporter = null;
-    return cachedTransporter;
-  }
-
-  const port = Number(process.env.MAIL_PORT) || 587;
-  // ssl (implicit TLS, typically port 465) vs tls/starttls (typically 587).
-  const encryption = (process.env.MAIL_ENCRYPTION || "").toLowerCase();
-  const secure = encryption === "ssl" || (encryption !== "tls" && port === 465);
-
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-  });
-  return cachedTransporter;
+interface MailConfig {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  encryption: string | null;
+  fromAddress: string;
+  fromName: string | null;
 }
 
-function getFromHeader(): string {
-  const address = process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME || "";
+/**
+ * SMTP config is admin-editable at runtime (see /admin/settings), so it's
+ * re-read on every send rather than cached at module scope — email sending
+ * isn't a hot path, and a stale cached transporter would silently keep
+ * using credentials the admin just rotated or cleared.
+ */
+async function resolveMailConfig(): Promise<MailConfig | null> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.from("email_settings").select("*").eq("id", 1).maybeSingle();
+    if (data?.mail_host && data.mail_username && data.mail_password) {
+      return {
+        host: data.mail_host,
+        port: data.mail_port || 587,
+        username: data.mail_username,
+        password: data.mail_password,
+        encryption: data.mail_encryption,
+        fromAddress: data.mail_from_address || data.mail_username,
+        fromName: data.mail_from_name,
+      };
+    }
+  } catch {
+    // Supabase unreachable/misconfigured — fall through to env vars below.
+  }
+
+  const host = process.env.MAIL_HOST;
+  const username = process.env.MAIL_USERNAME;
+  const password = process.env.MAIL_PASSWORD;
+  if (host && username && password) {
+    return {
+      host,
+      port: Number(process.env.MAIL_PORT) || 587,
+      username,
+      password,
+      encryption: process.env.MAIL_ENCRYPTION || null,
+      fromAddress: process.env.MAIL_FROM_ADDRESS || username,
+      fromName: process.env.MAIL_FROM_NAME || null,
+    };
+  }
+
+  return null;
+}
+
+function getFromHeader(config: MailConfig): string {
   // MAIL_FROM_NAME copied from a Laravel .env often looks like
   // `"${APP_NAME}"` — that's Laravel-only interpolation, Node won't expand
   // it, so treat a literal "${...}" value the same as unset.
-  const rawName = process.env.MAIL_FROM_NAME;
-  const name = rawName && !rawName.startsWith("${") ? rawName : APP_NAME;
-  return address ? `${name} <${address}>` : name;
+  const name = config.fromName && !config.fromName.startsWith("${") ? config.fromName : APP_NAME;
+  return `${name} <${config.fromAddress}>`;
 }
 
 interface SendEmailInput {
@@ -45,23 +70,44 @@ interface SendEmailInput {
   html: string;
 }
 
+interface SendEmailResult {
+  ok: boolean;
+  error?: string;
+}
+
 /**
  * Best-effort transactional email over SMTP. Never throws — a failed or
  * unconfigured email send must never break the underlying transaction
  * workflow (the in-app notification/message already recorded the event
- * regardless). Without MAIL_HOST/MAIL_USERNAME/MAIL_PASSWORD set, this just
- * logs and no-ops.
+ * regardless). Returns { ok, error } so callers that specifically need to
+ * know delivery succeeded (e.g. the admin "send test email" action) can
+ * check it; every other call site just fires-and-forgets the promise.
  */
-export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<void> {
-  const transporter = getTransporter();
-  if (!transporter) {
-    console.warn(`[email] SMTP not configured (MAIL_HOST/MAIL_USERNAME/MAIL_PASSWORD) — skipped "${subject}" to ${to}`);
-    return;
+export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<SendEmailResult> {
+  const config = await resolveMailConfig();
+  if (!config) {
+    const message = "SMTP is not configured (set it in /admin/settings or MAIL_HOST/MAIL_USERNAME/MAIL_PASSWORD).";
+    console.warn(`[email] ${message} — skipped "${subject}" to ${to}`);
+    return { ok: false, error: message };
   }
 
+  const port = config.port;
+  const encryption = (config.encryption || "").toLowerCase();
+  const secure = encryption === "ssl" || (encryption !== "tls" && port === 465);
+
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port,
+    secure,
+    auth: { user: config.username, pass: config.password },
+  });
+
   try {
-    await transporter.sendMail({ from: getFromHeader(), to, subject, html });
+    await transporter.sendMail({ from: getFromHeader(config), to, subject, html });
+    return { ok: true };
   } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send email.";
     console.error(`[email] send failed for "${subject}" to ${to}:`, err);
+    return { ok: false, error: message };
   }
 }

@@ -9,6 +9,18 @@ export const platformSettingsSchema = z.object({
   defaultInspectionDays: z.coerce.number().int().min(1).max(60),
 });
 
+export const emailSettingsSchema = z.object({
+  mailHost: z.string().trim().max(255).optional().or(z.literal("")),
+  mailPort: z.coerce.number().int().min(1).max(65535).optional(),
+  mailUsername: z.string().trim().max(255).optional().or(z.literal("")),
+  // Blank = leave the stored password unchanged; use clearPassword to remove it.
+  mailPassword: z.string().trim().max(255).optional().or(z.literal("")),
+  clearPassword: z.boolean().optional(),
+  mailEncryption: z.enum(["ssl", "tls", "none"]).optional(),
+  mailFromAddress: z.string().trim().email("Enter a valid from address").optional().or(z.literal("")),
+  mailFromName: z.string().trim().max(120).optional().or(z.literal("")),
+});
+
 export const resolveDisputeSchema = z.object({
   disputeId: z.string().uuid(),
   resolution: z.enum(["resolved_buyer", "resolved_seller", "resolved_split"]),

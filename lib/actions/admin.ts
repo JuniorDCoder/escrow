@@ -13,15 +13,17 @@ import {
 } from "./_shared";
 import { assertTransition, TRANSITIONS } from "@/lib/domain/state-machine";
 import {
+  emailSettingsSchema,
   forceTransitionSchema,
   platformSettingsSchema,
   resolveDisputeSchema,
   updateUserSchema,
 } from "@/lib/validations/admin";
 import { paymentMethodSchema, reviewPaymentProofSchema } from "@/lib/validations/payment";
+import { sendEmail } from "@/lib/email/send";
 import { APP_NAME } from "@/lib/constants";
 import type { ActionResult } from "./transactions";
-import type { Profile, TransactionStatus } from "@/lib/types/database";
+import type { EmailSettings, Profile, TransactionStatus } from "@/lib/types/database";
 
 export async function reviewPaymentProofAction(input: unknown): Promise<ActionResult> {
   try {
@@ -280,6 +282,60 @@ export async function updatePlatformSettingsAction(input: unknown): Promise<Acti
 
     await logAdminAction(admin, profile.id, "update_settings", "settings", "1");
     revalidatePath("/", "layout");
+    return {};
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+export async function updateEmailSettingsAction(input: unknown): Promise<ActionResult> {
+  try {
+    const parsed = emailSettingsSchema.safeParse(input);
+    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const values = parsed.data;
+
+    const { profile } = await requireAdmin();
+    const admin = getAdminClient();
+
+    const update: Partial<EmailSettings> = {
+      mail_host: values.mailHost || null,
+      mail_port: values.mailPort || null,
+      mail_username: values.mailUsername || null,
+      mail_encryption: values.mailEncryption || null,
+      mail_from_address: values.mailFromAddress || null,
+      mail_from_name: values.mailFromName || null,
+    };
+    // Blank password field = leave the stored password unchanged; the
+    // "clear stored password" checkbox is the only way to remove it, so a
+    // password never gets silently wiped by re-saving the rest of the form.
+    if (values.clearPassword) {
+      update.mail_password = null;
+    } else if (values.mailPassword) {
+      update.mail_password = values.mailPassword;
+    }
+
+    const { error } = await admin.from("email_settings").update(update).eq("id", 1);
+    if (error) throw error;
+
+    await logAdminAction(admin, profile.id, "update_email_settings", "email_settings", "1");
+    revalidatePath("/admin/settings");
+    return {};
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+export async function sendTestEmailAction(): Promise<ActionResult> {
+  try {
+    const { profile } = await requireAdmin();
+
+    const result = await sendEmail({
+      to: profile.email,
+      subject: `Test email from ${APP_NAME}`,
+      html: `<p>This is a test email confirming your ${APP_NAME} SMTP settings are working.</p>`,
+    });
+    if (!result.ok) throw new ValidationError(result.error || "Failed to send test email.");
+
     return {};
   } catch (err) {
     return toActionError(err);
