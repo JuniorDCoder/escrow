@@ -47,11 +47,15 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
    - `NEXT_PUBLIC_SITE_URL` — **set this to your real deployed URL in Vercel's project settings, not just
      locally.** It's used to build every link in emails and auth redirects; left unset in production, it
      silently falls back to `http://localhost:3000` and every one of those links breaks.
-   - `RESEND_API_KEY` / `EMAIL_FROM` — without these, the app only creates in-app notifications and logs a
-     warning instead of emailing. Get a key at [resend.com](https://resend.com), verify a sending domain, and
-     set `EMAIL_FROM` to an address on it. **This matters more than it sounds**: when someone creates a
-     transaction and invites a counterparty who doesn't have an account yet, email is the *only* way that
-     person finds out — there's no in-app notification to show someone who's never logged in.
+   - `MAIL_HOST` / `MAIL_PORT` / `MAIL_USERNAME` / `MAIL_PASSWORD` / `MAIL_ENCRYPTION` / `MAIL_FROM_ADDRESS` /
+     `MAIL_FROM_NAME` — SMTP credentials for transactional email (works with Hostinger, or any SMTP provider).
+     Without these, the app only creates in-app notifications and logs a warning instead of emailing.
+     **This matters more than it sounds**: when someone creates a transaction and invites a counterparty who
+     doesn't have an account yet, email is the *only* way that person finds out — there's no in-app
+     notification to show someone who's never logged in. Use port `465` with `MAIL_ENCRYPTION=ssl` (implicit
+     TLS) or port `587` with `MAIL_ENCRYPTION=tls` (STARTTLS) — both work. `MAIL_FROM_NAME` must be a literal
+     string, not `${APP_NAME}` (that's Laravel-only syntax and won't be expanded here) — leave it unset to
+     fall back to `NEXT_PUBLIC_APP_NAME` automatically.
    - `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_WHATSAPP_NUMBER` as needed.
    - **On Vercel specifically:** these all need to be added under Project Settings → Environment Variables —
      a local `.env.local` file has no effect on the deployed site.
