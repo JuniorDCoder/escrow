@@ -34,7 +34,7 @@ const STATS = [
   },
   { 
     value: "3M+", 
-    label: "customers trust Escrow.com globally" 
+    label: "customers trust EscrowTrustLock.com globally" 
   },
   { 
     value: "Winner", 
