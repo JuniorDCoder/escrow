@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
+import { ChatTriggerButton } from "@/components/layout/chat-trigger-button";
 
 export function SiteFooter({
   appName,
   whatsappNumber,
+  chatEnabled = false,
   isAuthenticated = false,
 }: {
   appName: string;
   whatsappNumber: string | null;
+  chatEnabled?: boolean;
   isAuthenticated?: boolean;
 }) {
   return (
@@ -53,7 +56,11 @@ export function SiteFooter({
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} {appName}. All rights reserved.
           </p>
-          {whatsappNumber && <WhatsAppButton number={whatsappNumber} variant="inline" label="Chat with us" />}
+          {chatEnabled ? (
+            <ChatTriggerButton />
+          ) : (
+            whatsappNumber && <WhatsAppButton number={whatsappNumber} variant="inline" label="Chat with us" />
+          )}
         </div>
       </div>
     </footer>

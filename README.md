@@ -1,11 +1,11 @@
-# Amana Escrow (placeholder name)
+# Escrow Trustlock
 
 A trusted third-party escrow platform: a Buyer and Seller agree on a deal, the Buyer pays into escrow off-platform and
 uploads proof, an Admin manually verifies it, the Seller delivers, and funds are released once the Buyer accepts. See
 [`AGENTS.md`](./AGENTS.md) for the full product spec this build follows — read it before making product decisions.
 
-**"Amana Escrow" is a placeholder brand.** No name/logo has been chosen by the client yet. The name is not hardcoded
-anywhere — it's read from `NEXT_PUBLIC_APP_NAME` in one place, `lib/constants.ts`. Change the env var to rebrand.
+Domain: **escrowtrustlock.online**. The name isn't hardcoded anywhere — it's read from `NEXT_PUBLIC_APP_NAME` in one
+place, `lib/constants.ts`, falling back to the `settings.platform_name` DB value. Change the env var to rebrand again.
 
 ## Tech stack
 

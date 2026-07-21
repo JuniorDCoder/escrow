@@ -21,6 +21,11 @@ export const emailSettingsSchema = z.object({
   mailFromName: z.string().trim().max(120).optional().or(z.literal("")),
 });
 
+export const chatSettingsSchema = z.object({
+  chatEnabled: z.boolean(),
+  chatEmbedCode: z.string().trim().max(5000).optional().or(z.literal("")),
+});
+
 export const resolveDisputeSchema = z.object({
   disputeId: z.string().uuid(),
   resolution: z.enum(["resolved_buyer", "resolved_seller", "resolved_split"]),

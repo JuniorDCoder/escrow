@@ -1,4 +1,4 @@
--- Amana Escrow — initial schema
+-- Escrow Trustlock — initial schema
 -- Manual-payment escrow platform: money never moves programmatically through
 -- this database. Buyers upload proof of an off-platform payment; Admins
 -- manually verify it. See AGENTS.md for the full product spec this mirrors.
@@ -208,7 +208,7 @@ create table if not exists public.ratings (
 
 create table if not exists public.settings (
   id int primary key default 1,
-  platform_name text not null default 'Amana Escrow',
+  platform_name text not null default 'Escrow Trustlock',
   fee_percentage numeric(5, 2) not null default 3.5,
   fee_minimum numeric(10, 2) not null default 10,
   whatsapp_number text,

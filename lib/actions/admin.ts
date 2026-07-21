@@ -13,6 +13,7 @@ import {
 } from "./_shared";
 import { assertTransition, TRANSITIONS } from "@/lib/domain/state-machine";
 import {
+  chatSettingsSchema,
   emailSettingsSchema,
   forceTransitionSchema,
   platformSettingsSchema,
@@ -23,7 +24,7 @@ import { paymentMethodSchema, reviewPaymentProofSchema } from "@/lib/validations
 import { sendEmail } from "@/lib/email/send";
 import { APP_NAME } from "@/lib/constants";
 import type { ActionResult } from "./transactions";
-import type { EmailSettings, Profile, TransactionStatus } from "@/lib/types/database";
+import type { EmailSettings, PaymentMethod, Profile, TransactionStatus } from "@/lib/types/database";
 
 export async function reviewPaymentProofAction(input: unknown): Promise<ActionResult> {
   try {
@@ -218,7 +219,7 @@ export async function upsertPaymentMethodAction(input: unknown): Promise<ActionR
     }
 
     const payload = {
-      type: values.type,
+      type: values.type as PaymentMethod["type"],
       label: values.label,
       network: values.network || null,
       account_details: accountDetails,
@@ -336,6 +337,36 @@ export async function sendTestEmailAction(): Promise<ActionResult> {
     });
     if (!result.ok) throw new ValidationError(result.error || "Failed to send test email.");
 
+    return {};
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+export async function updateChatSettingsAction(input: unknown): Promise<ActionResult> {
+  try {
+    const parsed = chatSettingsSchema.safeParse(input);
+    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const values = parsed.data;
+
+    const { profile } = await requireAdmin();
+    const admin = getAdminClient();
+
+    // Accept either the raw JS or the whole <script>...</script> block most
+    // live-chat providers hand you — strip the tags if present so either
+    // paste works the same way once we inject it via next/script.
+    const chatEmbedCode = values.chatEmbedCode
+      ? values.chatEmbedCode.replace(/<\/?script[^>]*>/gi, "").trim()
+      : null;
+
+    const { error } = await admin
+      .from("settings")
+      .update({ chat_enabled: values.chatEnabled, chat_embed_code: chatEmbedCode })
+      .eq("id", 1);
+    if (error) throw error;
+
+    await logAdminAction(admin, profile.id, "update_chat_settings", "settings", "1");
+    revalidatePath("/", "layout");
     return {};
   } catch (err) {
     return toActionError(err);

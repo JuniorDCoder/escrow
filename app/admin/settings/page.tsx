@@ -3,6 +3,7 @@ import { getSettings } from "@/lib/data/settings";
 import { getEmailSettingsForAdmin } from "@/lib/data/email-settings";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { EmailSettingsForm } from "@/components/admin/email-settings-form";
+import { ChatSettingsForm } from "@/components/admin/chat-settings-form";
 
 export const metadata: Metadata = { title: "Platform Settings" };
 
@@ -13,9 +14,10 @@ export default async function AdminSettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">Fees, WhatsApp number, email, and defaults — no redeploy needed.</p>
+        <p className="text-sm text-muted-foreground">Fees, live chat, email, and defaults — no redeploy needed.</p>
       </div>
       <SettingsForm settings={settings} />
+      <ChatSettingsForm settings={settings} />
       <EmailSettingsForm settings={emailSettings} />
     </div>
   );

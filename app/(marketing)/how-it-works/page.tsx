@@ -17,7 +17,7 @@ const STAGES = [
   {
     title: "2. Payment into escrow",
     who: "Buyer",
-    body: `The Buyer sends payment (bank transfer, mobile money, or crypto) directly to ${APP_NAME}'s published account, then uploads a screenshot or receipt as proof inside the platform.`,
+    body: `The Buyer sends payment (bank transfer, Zelle, Cash App, Chime, Apple Pay, or crypto) directly to ${APP_NAME}'s published account, then uploads a screenshot or receipt as proof inside the platform.`,
   },
   {
     title: "3. Payment verification",

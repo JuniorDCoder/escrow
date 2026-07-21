@@ -37,11 +37,17 @@ export type TransactionCategory =
   | "services"
   | "crypto_asset"
   | "general_merchandise"
+  | "jewelry"
+  | "luxury_goods"
   | "other";
 
 export type FeePayer = "buyer" | "seller" | "split";
 
-export type PaymentMethodType = "bank_transfer" | "crypto" | "mobile_money" | "other";
+// "mobile_money" remains a valid value at the DB level (Postgres enums can't
+// drop values once added) but is no longer offered anywhere in the app UI —
+// replaced by the specific US-centric options below. See
+// supabase/migrations/20250107000000_rebrand_categories_payments_chat.sql.
+export type PaymentMethodType = "bank_transfer" | "crypto" | "mobile_money" | "zelle" | "cash_app" | "chime" | "apple_pay" | "other";
 
 export type ProofStatus = "pending" | "verified" | "rejected";
 
@@ -168,6 +174,8 @@ export type Settings = {
   whatsapp_number: string | null;
   support_email: string | null;
   default_inspection_days: number;
+  chat_enabled: boolean;
+  chat_embed_code: string | null;
 };
 
 export type AdminAction = {

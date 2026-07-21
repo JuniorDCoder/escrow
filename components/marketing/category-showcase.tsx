@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Globe2, Car, Laptop2, Briefcase, Bitcoin, Package, Boxes } from "lucide-react";
+import { Globe2, Car, Laptop2, Briefcase, Bitcoin, Package, Gem, Crown, Boxes } from "lucide-react";
 import { Reveal } from "@/components/marketing/reveal";
 
 const CATEGORIES = [
@@ -8,6 +8,8 @@ const CATEGORIES = [
   { icon: Laptop2, label: "Digital Goods" },
   { icon: Briefcase, label: "Services" },
   { icon: Bitcoin, label: "Crypto Assets" },
+  { icon: Gem, label: "Jewelry" },
+  { icon: Crown, label: "Luxury Goods" },
   { icon: Package, label: "Merchandise" },
   { icon: Boxes, label: "And more" },
 ];

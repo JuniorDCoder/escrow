@@ -18,6 +18,8 @@ const FALLBACK_SETTINGS: Settings = {
   whatsapp_number: DEFAULT_WHATSAPP_NUMBER || null,
   support_email: DEFAULT_SUPPORT_EMAIL,
   default_inspection_days: DEFAULT_INSPECTION_DAYS,
+  chat_enabled: false,
+  chat_embed_code: null,
 };
 
 /**

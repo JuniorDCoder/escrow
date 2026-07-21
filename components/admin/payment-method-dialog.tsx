@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PAYMENT_METHOD_TYPES } from "@/lib/constants";
 import type { PaymentMethod } from "@/lib/types/database";
 
 export function PaymentMethodDialog({ method, trigger }: { method?: PaymentMethod; trigger: React.ReactNode }) {
@@ -71,10 +72,11 @@ export function PaymentMethodDialog({ method, trigger }: { method?: PaymentMetho
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="bank_transfer">Bank transfer</SelectItem>
-                  <SelectItem value="crypto">Crypto</SelectItem>
-                  <SelectItem value="mobile_money">Mobile money</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  {PAYMENT_METHOD_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

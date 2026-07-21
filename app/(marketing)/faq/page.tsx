@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: "What payment methods are supported?",
-    a: "Bank transfer, mobile money, and select cryptocurrencies — see the current list on the Fees page. Admins can add or remove methods at any time.",
+    a: "Bank transfer, Zelle, Cash App, Chime, Apple Pay, and select cryptocurrencies — see the current list on the Fees page. Admins can add or remove methods at any time.",
   },
   {
     q: "Is there a fee?",
@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: "How do I get help?",
-    a: "Use the WhatsApp button in the corner of any page, or the Contact page — a real person will respond.",
+    a: "Use the chat bubble in the corner of any page, or the Contact page — a real person will respond.",
   },
 ];
 

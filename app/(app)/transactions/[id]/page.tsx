@@ -27,6 +27,7 @@ import { MessageThread } from "@/components/transactions/message-thread";
 import { RatingForm } from "@/components/transactions/rating-form";
 import { ForceTransitionDialog } from "@/components/admin/force-transition-dialog";
 import { PayoutActions } from "@/components/admin/payout-actions";
+import { ChatTriggerButton } from "@/components/layout/chat-trigger-button";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = { title: "Transaction" };
@@ -71,15 +72,19 @@ export default async function TransactionDetailPage({ params }: { params: Promis
           </div>
           <p className="font-mono text-sm text-muted-foreground">{tx.reference_code}</p>
         </div>
-        {whatsappHref && (
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          >
-            <MessageCircle className="h-4 w-4" /> Need help? Chat with us on WhatsApp
-          </a>
+        {settings.chat_enabled ? (
+          <ChatTriggerButton label="Need help? Chat with us" />
+        ) : (
+          whatsappHref && (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            >
+              <MessageCircle className="h-4 w-4" /> Need help? Chat with us on WhatsApp
+            </a>
+          )
         )}
       </div>
 
@@ -174,6 +179,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
                   currency={tx.currency}
                   methods={activePaymentMethods}
                   whatsappNumber={settings.whatsapp_number}
+                  chatEnabled={settings.chat_enabled}
                   referenceCode={tx.reference_code}
                 />
                 <PaymentProofDialog

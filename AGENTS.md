@@ -209,21 +209,16 @@ Build in this order: Auth → transaction creation/state machine → manual paym
 
 ---
 
-## 10. Branding — the client has no name/logo yet
+## 10. Branding — decided: Escrow Trustlock
 
-Do not silently pick one and lock it in — propose 3–5 candidates in the PR/first deliverable and let the client choose, but code the app so the name is **not hardcoded** anywhere (use a `platform_name`/`NEXT_PUBLIC_APP_NAME` value pulled from one place — env var or `settings` table — so renaming later is a one-line change, not a find-and-replace across the repo).
-
-**Naming direction:** evoke trust, neutrality, safekeeping — the same register as escrow.com, Trustap, SafeFunds, Escudo, Notarize. Avoid anything cutesy or generic-SaaS ("-ify", "-ly"). Some directions to explore with the client (do not present these as final):
-- Literal/trust words: *Vaultly, Custodia, Trustlock, Assurehold*
-- Africa-forward if the client wants local resonance: a Swahili/Yoruba/regional word meaning "trust," "safe," or "witness," paired with a clean suffix (e.g. "Amana" — Swahili/Arabic for trust/safekeeping — + "Pay/Hold/Escrow").
-- Compound clarity: *ClearHold, SafeRelease, MidPoint Escrow*
+The client has chosen the name **Escrow Trustlock**, domain **escrowtrustlock.online**. The name is still **not hardcoded** anywhere — it's pulled from one place (`NEXT_PUBLIC_APP_NAME` env var, falling back to the `settings.platform_name` value in the DB), so a future rename stays a one-line env-var change, not a find-and-replace across the repo. Set `NEXT_PUBLIC_APP_NAME="Escrow Trustlock"` and `NEXT_PUBLIC_SITE_URL="https://escrowtrustlock.online"` in Vercel's project env vars.
 
 **Visual identity direction (for whoever builds the actual logo):**
-- Simple wordmark + a geometric mark: a shield, a lock, a handshake abstraction, or two interlocking brackets (representing "holding in the middle"). Avoid literal padlock cliché if possible — most fintech/escrow brands use it, differentiate with a shield, a knot, or an abstract "H" (hold).
+- Simple wordmark + a geometric mark: a shield, a lock, a handshake abstraction, or two interlocking brackets (representing "holding in the middle"). Avoid literal padlock cliché if possible — most fintech/escrow brands use it, differentiate with a shield, a knot, or an abstract "H" (hold). The current favicon/app icon is an abstract shield mark, not tied to any specific name, so it doesn't need regenerating for the rename.
 - Color: deep blue/navy or teal as primary (trust, finance), a single accent (amber/green) reserved only for "funds secured / success" states — don't let the accent color leak into general UI or it loses meaning.
 - Typography: a clean geometric or humanist sans (Inter, Manrope, Söhne-alike) — no display/script fonts anywhere near money.
 
-This section should move to a `BRANDING.md` once the client picks a direction — keep AGENTS.md focused on build mechanics.
+**On matching escrow.com's look:** mirroring their layout, copy style, and "why trust us" structure is fine and intentional. Do **not** mirror their actual numbers, awards, or partner logos (transaction volume, customer counts, BBB Torch Award, U.S. Commercial Service seal, eBay partnership) — those are escrow.com's real, verifiable credentials, not this platform's. Presenting them as Escrow Trustlock's own would be fabricating trust signals, which is exactly the pattern fake-escrow scam sites use. Once this platform has real volume/testimonials, replace the honest placeholder trust section with real ones.
 
 ---
 

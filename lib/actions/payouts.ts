@@ -15,6 +15,7 @@ import { payoutDetailsSchema } from "@/lib/validations/payment";
 import { PAYOUT_ELIGIBLE_STATUSES } from "@/lib/domain/state-machine";
 import { APP_NAME } from "@/lib/constants";
 import type { ActionResult } from "./transactions";
+import type { Payout } from "@/lib/types/database";
 
 export async function submitPayoutDetailsAction(input: unknown): Promise<ActionResult> {
   try {
@@ -43,7 +44,7 @@ export async function submitPayoutDetailsAction(input: unknown): Promise<ActionR
       {
         transaction_id: transactionId,
         seller_id: user.id,
-        method_type: methodType,
+        method_type: methodType as Payout["method_type"],
         account_details: accountDetails,
         note: note || null,
         status: "pending",

@@ -17,7 +17,12 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <div className="w-full max-w-md">{children}</div>
         </div>
       </main>
-      <SiteFooter appName={APP_NAME} whatsappNumber={settings.whatsapp_number} isAuthenticated={isAuthenticated} />
+      <SiteFooter
+        appName={APP_NAME}
+        whatsappNumber={settings.whatsapp_number}
+        chatEnabled={settings.chat_enabled}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   );
 }

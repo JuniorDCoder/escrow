@@ -1,10 +1,13 @@
-import { Landmark, Bitcoin, Smartphone, Banknote } from "lucide-react";
+import { Landmark, Bitcoin, Banknote, Zap, DollarSign, PiggyBank, CreditCard } from "lucide-react";
 
 const RAILS = [
   { icon: Landmark, label: "Bank Transfer" },
   { icon: Bitcoin, label: "Bitcoin" },
   { icon: Banknote, label: "USDT" },
-  { icon: Smartphone, label: "Mobile Money" },
+  { icon: Zap, label: "Zelle" },
+  { icon: DollarSign, label: "Cash App" },
+  { icon: PiggyBank, label: "Chime" },
+  { icon: CreditCard, label: "Apple Pay" },
 ];
 
 export function PaymentRails() {

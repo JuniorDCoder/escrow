@@ -11,7 +11,12 @@ export default async function MarketingLayout({ children }: { children: React.Re
     <div className="flex min-h-screen flex-col">
       <SiteHeader appName={APP_NAME} isAuthenticated={isAuthenticated} />
       <main className="flex-1">{children}</main>
-      <SiteFooter appName={APP_NAME} whatsappNumber={settings.whatsapp_number} isAuthenticated={isAuthenticated} />
+      <SiteFooter
+        appName={APP_NAME}
+        whatsappNumber={settings.whatsapp_number}
+        chatEnabled={settings.chat_enabled}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   );
 }

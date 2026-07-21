@@ -3,7 +3,7 @@ import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
 import { getSettings } from "@/lib/data/settings";
-import { WhatsAppButton } from "@/components/layout/whatsapp-button";
+import { ChatWidget } from "@/components/layout/chat-widget";
 import { Toaster } from "@/components/ui/sonner";
 
 const manrope = Manrope({
@@ -36,7 +36,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         {children}
-        <WhatsAppButton number={settings.whatsapp_number} />
+        <ChatWidget embedCode={settings.chat_enabled ? settings.chat_embed_code : null} />
         <Toaster position="top-right" richColors />
       </body>
     </html>

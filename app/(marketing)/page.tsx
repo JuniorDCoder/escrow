@@ -16,8 +16,14 @@ import { Reveal } from "@/components/marketing/reveal";
 
 export const metadata: Metadata = {
   title: "Trusted Escrow for Any Deal",
-  description: `${APP_NAME} holds funds until both sides confirm the deal is done — for domains, vehicles, digital goods, services, and more.`,
+  description: `${APP_NAME} holds funds until both sides confirm the deal is done — for domains, vehicles, digital goods, jewelry, luxury goods, services, and more.`,
 };
+
+const STATS = [
+  { value: "Every", label: "payment proof checked by a real person before funds are marked secured" },
+  { value: "0", label: "payment gateways — nothing moves automatically, ever" },
+  { value: "100%", label: "of admin actions permanently logged to an audit trail" },
+];
 
 const STEPS = [
   { icon: FileCheck, title: "Agree on terms", body: "Buyer or Seller creates the transaction and invites the other party to review and accept." },
@@ -52,11 +58,12 @@ export default async function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5 text-secured" /> Neutral third-party escrow
               </div>
               <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
-                Buy and sell with <span className="text-primary">nothing to lose.</span>
+                Never buy or sell online without using <span className="text-primary">{APP_NAME}</span>.
               </h1>
               <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-                {APP_NAME}{" "}holds the money in the middle. The Seller only ships once payment is verified. The Buyer
-                only pays out once they accept delivery. Neither side is ever exposed.
+                With {APP_NAME} you can buy and sell almost anything safely — the money sits with us in the middle
+                until both sides are protected. The Seller only ships once payment is verified. The Buyer only pays
+                out once they accept delivery. Neither side is ever exposed.
               </p>
 
               <div className="mt-8">
@@ -84,6 +91,20 @@ export default async function LandingPage() {
             Works with the payment methods you already use
           </p>
           <PaymentRails />
+        </div>
+      </section>
+
+      {/* STATS — honest, structural facts about how the platform works, not
+          a track record we don't have yet. See AGENTS.md Section 10 for why
+          we don't reuse escrow.com's actual volume/customer numbers here. */}
+      <section className="border-b border-border bg-primary text-primary-foreground">
+        <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6">
+          {STATS.map((s) => (
+            <div key={s.label} className="text-center sm:text-left">
+              <p className="text-3xl font-semibold tracking-tight sm:text-4xl">{s.value}</p>
+              <p className="mt-1.5 text-sm text-primary-foreground/80">{s.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 

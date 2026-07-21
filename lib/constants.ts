@@ -1,10 +1,9 @@
 /**
  * Single source of truth for the platform name/branding.
  * Change NEXT_PUBLIC_APP_NAME in the environment to rebrand — never hardcode
- * the name elsewhere in the app. See AGENTS.md Section 10: no name/logo has
- * been chosen by the client yet, "Amana Escrow" is a placeholder default.
+ * the name elsewhere in the app. See AGENTS.md Section 10.
  */
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Amana Escrow";
+export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Escrow Trustlock";
 
 /**
  * Absolute origin used to build links in emails (invites, auth redirects).
@@ -47,6 +46,22 @@ export const TRANSACTION_CATEGORIES = [
   { value: "services", label: "Services" },
   { value: "crypto_asset", label: "Crypto Asset" },
   { value: "general_merchandise", label: "General Merchandise" },
+  { value: "jewelry", label: "Jewelry" },
+  { value: "luxury_goods", label: "Luxury Goods" },
+  { value: "other", label: "Other" },
+] as const;
+
+// "mobile_money" is intentionally excluded — it remains a valid value at the
+// DB level (Postgres enums can't drop values once added) for any legacy
+// row, but is no longer offered for new selection here. See
+// supabase/migrations/20250107000000_rebrand_categories_payments_chat.sql.
+export const PAYMENT_METHOD_TYPES = [
+  { value: "bank_transfer", label: "Bank transfer" },
+  { value: "crypto", label: "Crypto" },
+  { value: "zelle", label: "Zelle" },
+  { value: "cash_app", label: "Cash App" },
+  { value: "chime", label: "Chime" },
+  { value: "apple_pay", label: "Apple Pay" },
   { value: "other", label: "Other" },
 ] as const;
 

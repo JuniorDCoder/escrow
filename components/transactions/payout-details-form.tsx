@@ -10,12 +10,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PAYMENT_METHOD_TYPES } from "@/lib/constants";
 import type { PaymentMethodType, Payout } from "@/lib/types/database";
 
 const METHOD_LABELS: Record<PaymentMethodType, string> = {
   bank_transfer: "Bank transfer",
   crypto: "Crypto",
   mobile_money: "Mobile money",
+  zelle: "Zelle",
+  cash_app: "Cash App",
+  chime: "Chime",
+  apple_pay: "Apple Pay",
   other: "Other",
 };
 
@@ -83,8 +88,8 @@ export function PayoutDetailsForm({ transactionId, payout }: { transactionId: st
       <CardHeader>
         <CardTitle>Set your payout details</CardTitle>
         <CardDescription>
-          Tell {APP_NAME} where to send your funds once the transaction is released — a bank account, crypto wallet, or
-          mobile money number.
+          Tell {APP_NAME} where to send your funds once the transaction is released — a bank account, crypto wallet,
+          Zelle, Cash App, Chime, or Apple Pay.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,10 +101,11 @@ export function PayoutDetailsForm({ transactionId, payout }: { transactionId: st
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="bank_transfer">Bank transfer</SelectItem>
-                <SelectItem value="crypto">Crypto</SelectItem>
-                <SelectItem value="mobile_money">Mobile money</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {PAYMENT_METHOD_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

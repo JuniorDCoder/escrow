@@ -143,7 +143,7 @@ export function EmailSettingsForm({ settings }: { settings: EmailSettingsView | 
             </div>
             <div className="space-y-2">
               <Label htmlFor="mailFromName">From name</Label>
-              <Input id="mailFromName" placeholder="Amana Escrow" {...register("mailFromName")} />
+              <Input id="mailFromName" placeholder="Escrow Trustlock" {...register("mailFromName")} />
             </div>
           </div>
           {formError && <p className="text-sm text-destructive">{formError}</p>}

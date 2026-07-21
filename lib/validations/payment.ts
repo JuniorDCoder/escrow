@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { PAYMENT_METHOD_TYPES } from "@/lib/constants";
+
+const paymentMethodTypeValues = PAYMENT_METHOD_TYPES.map((t) => t.value) as [string, ...string[]];
 
 export const submitPaymentProofSchema = z.object({
   transactionId: z.string().uuid(),
@@ -24,7 +27,7 @@ export const submitDeliveryProofSchema = z.object({
 
 export const payoutDetailsSchema = z.object({
   transactionId: z.string().uuid(),
-  methodType: z.enum(["bank_transfer", "crypto", "mobile_money", "other"]),
+  methodType: z.enum(paymentMethodTypeValues),
   accountDetails: z.string().trim().min(3, "Provide the account or wallet details to pay you out to").max(1000),
   note: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -33,7 +36,7 @@ export type PayoutDetailsInput = z.infer<typeof payoutDetailsSchema>;
 
 export const paymentMethodSchema = z.object({
   id: z.string().uuid().optional(),
-  type: z.enum(["bank_transfer", "crypto", "mobile_money", "other"]),
+  type: z.enum(paymentMethodTypeValues),
   label: z.string().trim().min(2).max(120),
   network: z.string().trim().max(120).optional().or(z.literal("")),
   accountDetails: z.string().trim().min(2, "Provide the account/wallet details"),
