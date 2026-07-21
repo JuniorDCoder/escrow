@@ -156,7 +156,13 @@ export default async function TransactionDetailPage({ params }: { params: Promis
                 <CardTitle>Pay into escrow</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <PaymentInstructions amountDue={tx.total_payable} currency={tx.currency} methods={activePaymentMethods} />
+                <PaymentInstructions
+                  amountDue={tx.total_payable}
+                  currency={tx.currency}
+                  methods={activePaymentMethods}
+                  whatsappNumber={settings.whatsapp_number}
+                  referenceCode={tx.reference_code}
+                />
                 <PaymentProofDialog
                   transactionId={tx.id}
                   amountDue={tx.total_payable}

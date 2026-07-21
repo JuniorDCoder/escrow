@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { formatCurrency } from "@/lib/utils";
 import type { PaymentMethod } from "@/lib/types/database";
 
@@ -11,10 +13,14 @@ export function PaymentInstructions({
   amountDue,
   currency,
   methods,
+  whatsappNumber,
+  referenceCode,
 }: {
   amountDue: number;
   currency: string;
   methods: PaymentMethod[];
+  whatsappNumber?: string | null;
+  referenceCode?: string;
 }) {
   return (
     <div className="space-y-4">
@@ -24,9 +30,33 @@ export function PaymentInstructions({
       </div>
 
       {methods.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No payment methods are configured yet. Use the WhatsApp button to get payment instructions from support.
-        </p>
+        <div className="space-y-3 rounded-md border border-warning/30 bg-warning-soft px-4 py-3">
+          <p className="text-sm text-warning">
+            No payment methods are active right now.{" "}
+            {whatsappNumber
+              ? "Contact us on WhatsApp and we'll send you payment details directly."
+              : "Contact support and we'll send you payment details directly."}
+          </p>
+          {whatsappNumber ? (
+            <WhatsAppButton
+              number={whatsappNumber}
+              variant="inline"
+              label="Get payment details on WhatsApp"
+              message={
+                referenceCode
+                  ? `Hi, I need payment details for my escrow transaction ${referenceCode} — I don't see any active payment methods on the page.`
+                  : undefined
+              }
+            />
+          ) : (
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 rounded-md border border-input bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+            >
+              Contact support
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
           {methods.map((method) => (
