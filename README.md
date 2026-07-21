@@ -72,6 +72,16 @@ Actions for all mutations. No payment gateway — payment confirmation is a manu
      deploys, a wildcard like `https://your-app.vercel.app/**`. Keep `http://localhost:3000/**` in the list
      too so local dev keeps working.
 
+   **Two separate email systems — don't confuse them.** The `MAIL_*` env vars / Admin → Settings → Email
+   (SMTP) above only send *this app's own* transactional emails (transaction invites, payment status updates,
+   etc.) via `lib/email/send.ts`. Supabase Auth's own emails — signup confirmation, password reset — are sent
+   entirely by Supabase's GoTrue service and never touch this app's code, so that SMTP config has **zero**
+   effect on them. Supabase's default built-in email sender is low-volume/rate-limited and can silently fail
+   to deliver, especially after a burst of test signups. If confirmation emails aren't arriving at all (not
+   just landing on the wrong URL), configure Supabase's *own* SMTP separately: Project Settings → Auth → SMTP
+   Settings, using the same mailbox credentials — this is a second, independent settings panel from the one
+   in this app.
+
 4. **Make yourself an admin.** Sign up through the app once, then in the Supabase SQL Editor:
    ```sql
    update public.profiles set is_admin = true where email = 'you@example.com';
