@@ -12,7 +12,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/auth/login");
 
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  let { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+
+  if (!profile) {
+    // The handle_new_user() trigger should always create this row on
+    // signup — but if it didn't (or hasn't committed yet), don't just
+    // redirect to /auth/login: that page treats "has a session" as "go to
+    // /dashboard," which bounces straight back here and loops forever.
+    // Self-heal instead.
+    const { data: healed } = await supabase
+      .from("profiles")
+      .insert({ id: user.id, email: user.email ?? "", full_name: (user.user_metadata?.full_name as string) ?? null })
+      .select()
+      .single();
+    profile = healed ?? null;
+  }
 
   if (!profile) redirect("/auth/login");
 
